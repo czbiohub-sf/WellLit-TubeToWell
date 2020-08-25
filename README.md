@@ -11,4 +11,4 @@
         `pip install kivy-garden`<br/>
         `garden install graph`<br/>
         `garden install matplotlib`<br/>
-5. Clone this repo https://github.com/czbiohub/TubeToWell-COVID19.git
+5. Clone this repo https://github.com/czbiohub/WellLit-TubeToWell
