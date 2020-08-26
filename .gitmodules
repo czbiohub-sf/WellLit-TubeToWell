@@ -1,0 +1,3 @@
+[submodule "WellLit"]
+	path = WellLit
+	url = https://github.com/czbiohub/WellLit

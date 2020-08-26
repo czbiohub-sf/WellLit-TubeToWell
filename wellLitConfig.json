@@ -1,9 +1,22 @@
-{
-    "OUTPUT_PATH": "C:\\Users\\joana.cabrera\\Desktop\\wl_output",
-    "A1_X": 0.235,
-    "A1_Y": 0.59,
-    "WELL_SPACING": 0.045,
-    "MARKER_SHAPE": "square",
-    "CIRC_RADIUIS": 0.024,
-    "SQUARE_LENGTH": 0.04
+{   "num_wells": "96",
+    "records_dir": "",
+
+    "384": {
+    "A1_X_dest": 0.235,
+    "A1_Y_dest": 0.59,
+    "size_param": {
+        "circle": 0.012,
+        "square": 0.02
+    },
+    "well_spacing": 0.0185
+},
+    "96": {
+    "A1_X_dest": 0.235,
+    "A1_Y_dest": 0.59,
+    "size_param": {
+        "circle" : 0.024,
+        "square" : 0.04
+    },
+    "well_spacing": 0.03725
+}
 }

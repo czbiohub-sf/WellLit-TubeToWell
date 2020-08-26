@@ -23,7 +23,7 @@
 	font_size: 30
 
 
-<PLWidget>:
+<TubeToWellWidget>:
 	orientation: 'vertical'
 	BoxLayout:
 		orientation: 'horizontal'
@@ -34,25 +34,25 @@
     		width: 300
 			id: metadata_box
 			orientation: 'vertical'
-			MetaLabel:
+			Label:
 				id: recorder_label
 				text: '[b]Recorder:[/b] \n'
-			MetaLabel:
+			Label:
 				id: aliquoter_label
 				text: '[b]Aliquoter:[/b] \n'
-			MetaLabel:
+			Label:
 				id: plate_barcode_label
 				text: '[b]Plate Barcode:[/b] \n'
-			MetaLabel: 
+			Label:
 				text: '[b]Tube Barcode:[/b]'
-			MetaLabel:
+			Label:
 				id: tube_barcode_label
 				font_size: 50
 			Label:
 				size_hint_y: 1.5
 
 	    Label:
-	    	id: notificationLabel
+	    	id: status
 	        text: "Please scan the recorder's barcode"
 	        font_size: 50
 	        bold: True
@@ -73,6 +73,8 @@
 		    	text: 'Finish Plate'
 		    	on_press: root.finishPlate()
 	WellPlot:
-		id: wellPlot
+		id: dest_plate
+		shape: 'circle'
+		type: 'dest_plate'
 
 		
