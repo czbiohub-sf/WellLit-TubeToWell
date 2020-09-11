@@ -2,17 +2,11 @@
 # Joana Cabrera
 # 3/15/2020
 
-import kivy
+import kivy, os
 kivy.require('1.11.1')
 from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-# noinspection ProblematicWhitespace
 from kivy.core.window import Window
-from kivy.uix.popup import Popup
-from kivy.properties import ObjectProperty, StringProperty
-from datetime import datetime
-from pathlib import Path
-import logging, os, time, json, csv
+from kivy.properties import StringProperty
 from WellLit.WellLitGUI import WellLitWidget, WellLitPopup, ConfirmPopup
 from WellLit.Transfer import TError, TConfirm
 from TubeToWell import TubeToWell
@@ -40,45 +34,71 @@ class TubeToWellWidget(WellLitWidget):
 		super(TubeToWellWidget, self).__init__(**kwargs)
 		self.ttw = TubeToWell()
 		self.ids.textbox.bind(focus=on_focus)
-		self.plateLighting = self.ids.dest_plate.pl
 		self.scanMode = False
 		self.ids.textbox.bind(on_text_validate=self.scanRecorder)
 		self.error_popup = WellLitPopup()
 		self.confirm_popup = ConfirmPopup()
 		self.status = ''
 
+	def updateLights(self):
+		if self.ids.dest_plate.pl is not None:
+			if self.ttw.tp_present():
+				# reset all wells for each refresh
+				self.ids.dest_plate.pl.emptyWells()
+
+				# mark current well as target
+				self.ids.dest_plate.pl.markTarget(self.ttw.tp.current_transfer['dest_well'])
+
+				# mark completed wells as filled
+				for tf_id in self.ttw.tp.lists['completed']:
+					self.ids.dest_plate.pl.markFilled(self.ttw.tp.transfers[tf_id]['dest_well'])
+
+
+	def next(self, blank):
+		barcode = self.ids.textbox.text
+		try:
+			self.ttw.next(barcode)
+			self.updateLights()
+		except TError as err:
+			self.showPopup(err, "Unable to complete")
+			self.status = self.ttw.msg
+		except TConfirm as conf:
+			self.showPopup(conf, "Plate complete")
+			self.status = self.ttw.msg
 
 	def undoTube(self):
 		try:
-			self.ttw.undoTube()
+			self.ttw.undo()
+			self.updateLights()
+			self.showPopup('Previous tube un-scanned', "Action undone")
+			self.status = self.ttw.msg
 		except TError as err:
 			self.showPopup(err, "Unable to undo")
-			self.status = self.ttw.status
-
+			self.status = self.ttw.msg
 
 	def finishPlate(self):
-		self.confirm_popup.show()
+		# def showPopup(self, error, title: str, func=None):
+		self.showPopup('Are you sure you want to finish the plate?', 'Confirm plate finish', self.resetAll)
 
-	def resetAll(self): 
-		self.plateLighting.reset()
-		
+	def resetAll(self, button):
 		# restart metadata collection
-		self.ids.textbox.funbind('on_text_validate', self.ttw.switchWell)
+		self.ids.textbox.funbind('on_text_validate', self.next)
 		self.ids.textbox.funbind('on_text_validate', self.scanAliquoter)
 		self.ids.textbox.funbind('on_text_validate', self.scanPlate)
 		self.ids.textbox.bind(on_text_validate=self.scanRecorder)
-		self.ids.notificationLabel.text = "Please scan the recorder's barcode"
+		self.ids.status.text = "Please scan the recorder's barcode"
 
 		# reset metadata text
 		self.ids.recorder_label.text = '[b]Recorder:[/b] \n'
 		self.ids.aliquoter_label.text = '[b]Aliquoter:[/b] \n'
 		self.ids.plate_barcode_label.text = '[b]Plate Barcode:[/b] \n'
 		self.ids.tube_barcode_label.text = '[b]Tube Barcode:[/b] \n'
-		self.ids.notificationLabel.font_size = 50
+		self.ids.status.font_size = 50
 
 		self.scanMode = False
-		self.canUndo = False
-		self.warningsMade = False
+
+		if self.ids.dest_plate.pl is not None:
+			self.ids.dest_plate.pl.emptyWells()
 
 	def showBarcodeError(self, barcode_type):
 		self.error_popup.title =  "Barcode Error"
@@ -86,8 +106,11 @@ class TubeToWellWidget(WellLitWidget):
 		self.ids.textbox.text = ''
 
 	def scanRecorder(self, *args):
+		"""
+		First step when starting a new plate. Checks to see if its a valid name with no numbers
+		"""
 		check_input = self.ids.textbox.text
-		if self.plateLighting.ttw.isName(check_input):
+		if self.ttw.isName(check_input):
 			self.recorder = check_input
 			self.ids.recorder_label.text += check_input 
 			self.ids.textbox.text = ''
@@ -95,13 +118,16 @@ class TubeToWellWidget(WellLitWidget):
 			# bind textbox to scanPlate after name is scanned
 			self.ids.textbox.funbind('on_text_validate',self.scanRecorder)
 			self.ids.textbox.bind(on_text_validate=self.scanAliquoter)
-			self.ids.notificationLabel.text = "Please scan the aliquoter's barcode"
+			self.ids.status.text = "Please scan the aliquoter's barcode"
 		else: 
 			self.showBarcodeError('name')
 
 	def scanAliquoter(self, *args):
+		"""
+		Second step when starting a new plate. Checks to see if its a valid name with no numbers
+		"""
 		check_input = self.ids.textbox.text
-		if self.plateLighting.ttw.isName(check_input):
+		if self.ttw.isName(check_input):
 			self.aliquoter = check_input
 			self.ids.aliquoter_label.text += check_input 
 			self.ids.textbox.text = ''
@@ -109,52 +135,44 @@ class TubeToWellWidget(WellLitWidget):
 			# bind textbox to scanPlate after name is scanned
 			self.ids.textbox.funbind('on_text_validate',self.scanAliquoter)
 			self.ids.textbox.bind(on_text_validate=self.scanPlate)
-			self.ids.notificationLabel.text = 'Please scan plate'
+			self.ids.status.text = 'Please scan plate'
 		else: 
 			self.showBarcodeError('name')
 
-		# bind textbox to scanPlate
+
 	def scanPlate(self, *args):
+		"""
+		Third step when starting a new plate.
+		Passes metadata to TubeToWell class to generate record files and transfer sequence
+		Initializes plotting area
+		"""
 		check_input = self.ids.textbox.text
-		if self.plateLighting.ttw.isPlate(check_input):
+		if self.ttw.isPlate(check_input):
 			self.plate_barcode = check_input
 			self.ids.plate_barcode_label.text += check_input 
 			self.ids.textbox.text = ''
 
-			# openCSV 
-			self.plateLighting.ttw.openCSV(recorder=self.recorder, aliquoter=self.aliquoter, plate_barcode=self.plate_barcode)
+			self.ttw.setMetaData(recorder=self.recorder, aliquoter=self.aliquoter, plate_barcode=self.plate_barcode)
+			self.ids.dest_plate.initialize()
+			self.pl = self.ids.dest_plate.pl
 
 			# set up text file confirmation
-			self.txt_file_path = os.path.join(self.plateLighting.ttw.csv_file_path +'_FINISHED.txt')
+			self.txt_file_path = os.path.join(self.ttw.csv +'_FINISHED.txt')
 			self.confirm_popup = ConfirmPopup(self.txt_file_path)
 
-			# bind textbox to switchwell after barcode is scanned
-			self.ids.textbox.funbind('on_text_validate',self.scanPlate)
-			self.ids.textbox.bind(on_text_validate=self.switchWell)
+			# bind textbox to ttw.next() after barcode is scanned
+			self.ids.textbox.funbind('on_text_validate', self.scanPlate)
+			self.ids.textbox.bind(on_text_validate=self.next)
 
-			self.ids.notificationLabel.text = 'Please scan tube'
+			self.ids.status.text = 'Please scan tube'
 			self.scanMode = True
 
 		else: 
 			self.showBarcodeError('plate')
 
-	def switchWell(self, *args):
-		self.ttw.switchWell()
 
-		check_input = self.ids.textbox.text 
-
-		# switch well if it is a new tube
-		if self.plateLighting.ttw.isTube(check_input):
-			self.ids.tube_barcode_label.text = check_input
-			self.canUndo = self.plateLighting.switchWell(check_input) # can only undo if it's a new target
-			self.ids.notificationLabel.font_size = 100
-			self.ids.notificationLabel.text = self.plateLighting.well_dict[check_input].location
-			print(self.plateLighting.well_dict[check_input].location)
-			self.ids.textbox.text = '' #clear textbox after scan
-		else: 
-			self.showBarcodeError('tube')
 		
 if __name__ == '__main__':
 	Window.size =(1600, 1200)
-	Window.fullscreen = True
+	Window.fullscreen = False
 	TubeToWellApp().run()
