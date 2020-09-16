@@ -30,7 +30,6 @@ class TubeToWell:
 		if not os.path.isdir(self.records_dir):
 			self.records_dir = cwd + '/records/'
 
-		self.canUndo = False
 		self.warningsMade = False
 
 		self.aliquoter = ''
@@ -79,7 +78,7 @@ class TubeToWell:
 		if not self.warningsMade:
 			self.makeWarningFile()
 			self.warningsMade = True
-
+		self.writeWarning()
 		if self.tp_present():
 			self.tp.undo()
 			self.writeTransferRecordFiles()
@@ -89,10 +88,16 @@ class TubeToWell:
 		logging.info(msg)
 
 	def writeWarning(self):
-		tf = self.tp.current_transfer
+		# looks back one step to mark this as undone
+		self.tp.current_idx_decrement()
+		transfer = self.tp.current_transfer
+		self.tp.current_idx_increment()
+		keys = ['timestamp', 'source_tube', 'dest_plate', 'status']
 		with open(self.warning_file_path + '.csv', 'a', newline='') as csvFile:
 			writer = csv.writer(csvFile)
-			writer.writerow([transfer[key] for key in keys])
+			warning_row = [transfer[key] for key in keys]
+			warning_row.append(' Marked Undone at ' + time.strftime("%Y%m%d-%H%M%S"))
+			writer.writerow(warning_row)
 			csvFile.close()
 
 	def makeWarningFile(self):
@@ -135,7 +140,8 @@ class TubeToWell:
 				keys = ['timestamp', 'source_tube', 'dest_plate', 'status']
 				for transfer_id in self.tp.tf_seq:
 					transfer = self.tp.transfers[transfer_id]
-					log_writer.writerow([transfer[key] for key in keys])
+					if transfer['status'] is not 'uncompleted':
+						log_writer.writerow([transfer[key] for key in keys])
 				self.log('Wrote transfer record to ' + str(record_path_filename))
 		except:
 			raise TError('Cannot write record file to ' + str(record_path_filename))
