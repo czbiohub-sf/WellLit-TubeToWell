@@ -25,6 +25,7 @@ class TubeToWell:
 		self.num_wells = configs['num_wells']
 		self.records_dir = configs['records_dir']
 		self.csv = ''
+		self.warning_file_path = ''
 
 		if not os.path.isdir(self.records_dir):
 			self.records_dir = cwd + '/records/'
@@ -49,6 +50,8 @@ class TubeToWell:
 		self.msg = ''
 		self.csv = ''
 		self.tp = TTWTransferProtocol(self)
+		self.warningsMade = False
+		self.warning_file_path = ''
 
 	def tp_present(self):
 		if self.tp is not None:
@@ -73,6 +76,10 @@ class TubeToWell:
 			self.writeTransferRecordFiles()
 
 	def undo(self):
+		if not self.warningsMade:
+			self.makeWarningFile()
+			self.warningsMade = True
+
 		if self.tp_present():
 			self.tp.undo()
 			self.writeTransferRecordFiles()
@@ -81,13 +88,20 @@ class TubeToWell:
 		self.msg = msg
 		logging.info(msg)
 
+	def writeWarning(self):
+		tf = self.tp.current_transfer
+		with open(self.warning_file_path + '.csv', 'a', newline='') as csvFile:
+			writer = csv.writer(csvFile)
+			writer.writerow([transfer[key] for key in keys])
+			csvFile.close()
+
 	def makeWarningFile(self):
 		self.warningsMade = True
-		warning_file_path = os.path.join(self.records_dir + self.csv + '_WARNING')
-
-		with open(warning_file_path + '.csv', 'w', newline='') as csvFile:
+		self.warning_file_path = os.path.join(self.records_dir + self.csv + '_WARNING')
+		with open(self.warning_file_path + '.csv', 'w', newline='') as csvFile:
 			writer = csv.writer(csvFile)
 			writer.writerows(self.metadata)
+			writer.writerow(['Timestamp', 'Source Tube', 'Destination plate', 'Destination well', 'Status'])
 			csvFile.close()
 
 	def setMetaData(self, recorder, aliquoter, plate_barcode):
@@ -127,15 +141,9 @@ class TubeToWell:
 			raise TError('Cannot write record file to ' + str(record_path_filename))
 
 	def isPlate(self, check_input):
-		if re.match(r'SP[0-9]{6}$', check_input) or check_input == 'EDIT':
-			return True
-		return False
+		return True
 
 	def isName(self, check_input):
-		if any(char.isdigit() for char in check_input):
-			return False
-		elif check_input == 'EDIT':
-			return True
 		return True
 
 
@@ -273,8 +281,6 @@ class TTWTransferProtocol(TransferProtocol):
 		return None
 
 	def isTube(self, check_input):
-		if re.match(r'[A-Z][0-9]{1,5}', check_input):
-			return True
-		return False
+		return True
 
 

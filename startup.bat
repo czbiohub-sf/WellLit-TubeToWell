@@ -1,3 +1,3 @@
 call activate WellLit
-python WellLitGUI.py
+python TubeToWellGUI.py
 pause
