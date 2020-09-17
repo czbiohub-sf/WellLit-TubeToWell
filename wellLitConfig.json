@@ -3,7 +3,7 @@
 
     "384": {
     "A1_X_dest": 0.235,
-    "A1_Y_dest": 0.59,
+    "A1_Y_dest": 0.135,
     "size_param": {
         "circle": 0.012,
         "square": 0.02
@@ -11,12 +11,12 @@
     "well_spacing": 0.0185
 },
     "96": {
-    "A1_X_dest": 0.235,
-    "A1_Y_dest": 0.59,
+    "A1_X_dest": 0.22,
+    "A1_Y_dest": 0.12,
     "size_param": {
         "circle" : 0.024,
         "square" : 0.04
     },
-    "well_spacing": 0.03725
+    "well_spacing": 0.045
 }
-}
+} 

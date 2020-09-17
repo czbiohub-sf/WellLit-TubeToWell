@@ -39,6 +39,12 @@ class TubeToWellWidget(WellLitWidget):
 		self.error_popup = WellLitPopup()
 		self.confirm_popup = ConfirmPopup()
 		self.status = ''
+		self.ids.dest_plate.initialize()
+
+
+	def _on_keyboard_up(self, keyboard, keycode, text, modifiers):
+		if keycode[1] == 'esc' or keycode[1]=='q':
+			self.showPopup('Are you sure you want to exit?', 'Confirm exit', func=self.quit)
 
 	def updateLights(self):
 		if self.ids.dest_plate.pl is not None:
@@ -53,9 +59,17 @@ class TubeToWellWidget(WellLitWidget):
 				for tf_id in self.ttw.tp.lists['completed']:
 					self.ids.dest_plate.pl.markFilled(self.ttw.tp.transfers[tf_id]['dest_well'])
 
+	def showPopup(self, error, title: str, func=None):
+		self._popup = WellLitPopup()
+		self._popup.size_hint = (0.6, .3)
+		self._popup.pos_hint = {'left': 1, 'top':  1}
+		self._popup.title = title
+		self._popup.show(error.__str__(), func=func)
 
 	def next(self, blank):
 		barcode = self.ids.textbox.text
+		self.ids.tube_barcode = barcode
+		self.ids.textbox.text = ''
 		try:
 			self.ttw.next(barcode)
 			self.updateLights()
@@ -174,5 +188,5 @@ class TubeToWellWidget(WellLitWidget):
 		
 if __name__ == '__main__':
 	Window.size =(1600, 1200)
-	Window.fullscreen = False
+	Window.fullscreen = True
 	TubeToWellApp().run()

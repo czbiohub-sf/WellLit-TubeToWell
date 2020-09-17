@@ -3,14 +3,16 @@
 #:import plt matplotlib.pyplot
 
 <ConfirmPopup>:
-	size_hint: None,None
-	height: 400
+	size_hint: 0.4,0.2
+	pos_hint: {'left': 1, 'top': 1}
+	height: 200
 	width: 500
 	title: 'Confirm exit'
 
 <WellLitPopup>:
-	size_hint: None,None
-	height: 400
+	size_hint: 0.4,0.2
+	pos_hint: {'left': 1, 'top': 1}
+	height: 200
 	width: 800
 
 <MetaLabel>:
@@ -44,6 +46,7 @@
 				id: plate_barcode_label
 				text: '[b]Plate Barcode:[/b] \n'
 			Label:
+				id: tube_barcode
 				text: '[b]Tube Barcode:[/b]'
 			Label:
 				id: tube_barcode_label
@@ -72,15 +75,10 @@
 		    Button:
 		    	text: 'Finish Plate'
 		    	on_press: root.finishPlate()
-	BoxLayout:
-	    orientation: 'vertical'
-	    size_hint: 1, 1
-	    pos_hint: {'center_x': 1, 'bottom': 1}
-        WellPlot:
-            id: dest_plate
-            shape: 'circle'
-            type: 'dest_plate'
-            pos_hint: {'center_x': 1, 'bottom': 1}
-            size_hint: 1, 0.5
+    WellPlot:
+        id: dest_plate
+        shape: 'circle'
+        type: 'dest_plate'
+        size_hint: 1, 0.5
 
 		

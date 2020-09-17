@@ -89,16 +89,17 @@ class TubeToWell:
 
 	def writeWarning(self):
 		# looks back one step to mark this as undone
-		self.tp.current_idx_decrement()
-		transfer = self.tp.current_transfer
-		self.tp.current_idx_increment()
-		keys = ['timestamp', 'source_tube', 'dest_plate', 'status']
-		with open(self.warning_file_path + '.csv', 'a', newline='') as csvFile:
-			writer = csv.writer(csvFile)
-			warning_row = [transfer[key] for key in keys]
-			warning_row.append(' Marked Undone at ' + time.strftime("%Y%m%d-%H%M%S"))
-			writer.writerow(warning_row)
-			csvFile.close()
+		if self.tp is not None:
+			self.tp.current_idx_decrement()
+			transfer = self.tp.current_transfer
+			self.tp.current_idx_increment()
+			keys = ['timestamp', 'source_tube', 'dest_plate', 'status']
+			with open(self.warning_file_path + '.csv', 'a', newline='') as csvFile:
+				writer = csv.writer(csvFile)
+				warning_row = [transfer[key] for key in keys]
+				warning_row.append(' Marked Undone at ' + time.strftime("%Y%m%d-%H%M%S"))
+				writer.writerow(warning_row)
+				csvFile.close()
 
 	def makeWarningFile(self):
 		self.warningsMade = True
