@@ -11,8 +11,8 @@
     "well_spacing": 0.0185
 },
     "96": {
-    "A1_X_dest": 0.22,
-    "A1_Y_dest": 0.12,
+    "A1_X_dest": 0.2325,
+    "A1_Y_dest": 0.1325,
     "size_param": {
         "circle" : 0.024,
         "square" : 0.04
