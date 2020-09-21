@@ -24,11 +24,15 @@ class TubeToWell:
 
 		self.num_wells = configs['num_wells']
 		self.records_dir = configs['records_dir']
+		self.records_dir = configs['samples_dir']
 		self.csv = ''
 		self.warning_file_path = ''
 
 		if not os.path.isdir(self.records_dir):
 			self.records_dir = cwd + '/records/'
+
+		if not os.path.isdir(self.records_dir):
+			self.records_dir = cwd + '/samples/'
 
 		self.warningsMade = False
 

@@ -5,8 +5,10 @@
 import kivy, os
 kivy.require('1.11.1')
 from kivy.app import App
+from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
 from kivy.properties import StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 from WellLit.WellLitGUI import WellLitWidget, WellLitPopup, ConfirmPopup
 from WellLit.Transfer import TError, TConfirm
 from TubeToWell import TubeToWell
@@ -22,6 +24,12 @@ def on_focus(instance, value):
 class TubeToWellApp(App):
 	def build(self):
 		return TubeToWellWidget()
+
+
+class LoadDialog(FloatLayout):
+	load = ObjectProperty(None)
+	cancel = ObjectProperty(None)
+	load_path = StringProperty('')
 
 class TubeToWellWidget(WellLitWidget):
 	"""
@@ -43,8 +51,11 @@ class TubeToWellWidget(WellLitWidget):
 
 
 	def _on_keyboard_up(self, keyboard, keycode, text, modifiers):
-		if keycode[1] == 'esc' or keycode[1]=='q':
+		if keycode[1] == 'esc':
 			self.showPopup('Are you sure you want to exit?', 'Confirm exit', func=self.quit)
+
+	def quit_button(self):
+		self.showPopup('Are you sure you want to exit?', 'Confirm exit', func=self.quit)
 
 	def updateLights(self):
 		if self.ids.dest_plate.pl is not None:
@@ -54,10 +65,11 @@ class TubeToWellWidget(WellLitWidget):
 
 				# mark current well as target
 				self.ids.dest_plate.pl.markTarget(self.ttw.tp.current_transfer['dest_well'])
-
+				print(self.ttw.tp.current_transfer['dest_well'])
 				# mark completed wells as filled
 				for tf_id in self.ttw.tp.lists['completed']:
 					self.ids.dest_plate.pl.markFilled(self.ttw.tp.transfers[tf_id]['dest_well'])
+			self.ids.dest_plate.pl.show()
 
 	def showPopup(self, error, title: str, func=None):
 		self._popup = WellLitPopup()
@@ -158,7 +170,6 @@ class TubeToWellWidget(WellLitWidget):
 		"""
 		Third step when starting a new plate.
 		Passes metadata to TubeToWell class to generate record files and transfer sequence
-		Initializes plotting area
 		"""
 		check_input = self.ids.textbox.text
 		if self.ttw.isPlate(check_input):
@@ -167,8 +178,6 @@ class TubeToWellWidget(WellLitWidget):
 			self.ids.textbox.text = ''
 
 			self.ttw.setMetaData(recorder=self.recorder, aliquoter=self.aliquoter, plate_barcode=self.plate_barcode)
-			self.ids.dest_plate.initialize()
-			self.pl = self.ids.dest_plate.pl
 
 			# set up text file confirmation
 			self.txt_file_path = os.path.join(self.ttw.csv +'_FINISHED.txt')
@@ -188,5 +197,5 @@ class TubeToWellWidget(WellLitWidget):
 		
 if __name__ == '__main__':
 	Window.size =(1600, 1200)
-	Window.fullscreen = True
+	Window.fullscreen = False
 	TubeToWellApp().run()

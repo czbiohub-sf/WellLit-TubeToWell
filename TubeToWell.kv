@@ -24,6 +24,26 @@
 <Button>
 	font_size: 30
 
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        FileChooserListView:
+            id: filechooser
+            path: root.load_path
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: 'Cancel'
+                on_release: root.cancel()
+            Button:
+                text: 'Load'
+                on_release: root.load(filechooser.selection)
+
 
 <TubeToWellWidget>:
 	orientation: 'vertical'
@@ -75,6 +95,9 @@
 		    Button:
 		    	text: 'Finish Plate'
 		    	on_press: root.finishPlate()
+		    Button:
+		        text: 'Quit'
+		        on_press: root.quit_button()
     WellPlot:
         id: dest_plate
         shape: 'circle'
