@@ -47,6 +47,7 @@ class TubeToWell:
 		self.msg = ''
 		self.tp = None
 		self.sample_list = None
+		self.tp = TTWTransferProtocol(self, controls=self.controls)
 
 	def reset(self):
 		self.aliquoter = ''
@@ -69,13 +70,17 @@ class TubeToWell:
 			raise TError(self.msg)
 
 	def next(self, barcode):
+		"""
+		Checks to see if a transfer protocol is present, and if a sample list has been loaded
+		marks the current scanned barcode as complete and writes transfer record file
+		"""
 		if self.tp_present():
 			if self.sample_list is None:
-				self.tp.complete(barcode)
+				self.tp.next(barcode)
 				self.writeTransferRecordFiles()
 			else:
 				self.checkSampleList(barcode)
-				self.tp.complete(barcode)
+				self.tp.next(barcode)
 				self.writeTransferRecordFiles()
 
 	def skip(self):
@@ -106,21 +111,29 @@ class TubeToWell:
 			raise TError('Sample barcode not in list of pre-defined sample names.')
 
 	def loadCSV(self, filename):
+		"""
+		Loads in a csv file of sample names to be verified.
+		"""
 		try:
 			# read the spreadsheet assuming first column is list of sample names, skipping the first row
-			samples_df = pd.read_csv(filename, skiprows=1, names=['sample'])
-			samples_list = [s for s in samples_df['sample']]
+			samples_df = pd.read_csv(filename, skiprows=1, names=['sample'], dtype=str)
+			self.sample_list = [s for s in samples_df['sample']]
+			self.log('Successfully loaded %s sample names' % len(self.sample_list))
+			for s in self.sample_list:
+				print(s)
 		except:
 			self.log('Failed to load file csv \n %s' % csv)
 			raise TError(self.msg)
 
 	def writeWarning(self):
-		# looks back one step to mark this as undone
+		""""
+		Generates warning file of undone transfers
+		"""
 		if self.tp is not None:
 			self.tp.current_idx_decrement()
 			transfer = self.tp.current_transfer
 			self.tp.current_idx_increment()
-			keys = ['timestamp', 'source_tube', 'dest_plate', 'status']
+			keys = ['timestamp', 'source_tube', 'dest_plate', 'dest_well', 'status']
 			with open(self.warning_file_path + '.csv', 'a', newline='') as csvFile:
 				writer = csv.writer(csvFile)
 				warning_row = [transfer[key] for key in keys]
@@ -129,12 +142,15 @@ class TubeToWell:
 				csvFile.close()
 
 	def makeWarningFile(self):
+		"""
+		Creates a warning file is none exists already
+		"""
 		self.warningsMade = True
 		self.warning_file_path = os.path.join(self.records_dir + self.csv + '_WARNING')
 		with open(self.warning_file_path + '.csv', 'w', newline='') as csvFile:
 			writer = csv.writer(csvFile)
 			writer.writerows(self.metadata)
-			writer.writerow(['Timestamp', 'Source Tube', 'Destination plate', 'Destination well', 'Status'])
+			writer.writerow(['Timestamp', 'Source Tube', 'Destination well'])
 			csvFile.close()
 
 	def setMetaData(self, recorder, aliquoter, plate_barcode):
@@ -146,7 +162,6 @@ class TubeToWell:
 		self.timestamp = time.strftime("%Y%m%d-%H%M%S")
 		self.plate_barcode = plate_barcode
 		self.csv = self.timestamp + '_' + self.plate_barcode + '_tube_to_plate'
-		self.tp = TTWTransferProtocol(self, controls=self.controls)
 
 	def writeTransferRecordFiles(self):
 		"""
@@ -164,8 +179,7 @@ class TubeToWell:
 			with open(record_path_filename, 'w', newline='') as logfile:
 				log_writer = csv.writer(logfile)
 				log_writer.writerows(self.metadata)
-				log_writer.writerow(['Timestamp', 'Source Tube', 'Destination plate', 'Destination well', 'Status'])
-				keys = ['timestamp', 'source_tube', 'dest_plate', 'dest_well', 'status']
+				keys = ['timestamp', 'source_tube', 'dest_well']
 				for transfer_id in self.tp.tf_seq:
 					transfer = self.tp.transfers[transfer_id]
 					if transfer['status'] is not 'uncompleted':
@@ -215,6 +229,7 @@ class TTWTransferProtocol(TransferProtocol):
 					well_names.append(well_name)
 
 		# build transfer protocol:
+		print(well_names)
 		self.tf_seq = np.empty(len(well_names), dtype=object)
 
 		current_idx = 0
@@ -225,6 +240,8 @@ class TTWTransferProtocol(TransferProtocol):
 			self.tf_seq[current_idx] = unique_id
 			current_idx += 1
 
+		print("Tf_seq has %s ids" % len(self.tf_seq))
+		print("transfers has %s transfers" % len(self.transfers))
 		self._current_idx = 0
 		self.synchronize()
 
@@ -257,14 +274,12 @@ class TTWTransferProtocol(TransferProtocol):
 		self.sortTransfers()
 		self.canUndo = True
 		if self.plateComplete():
-			self.log('Plate is complete, press reset to start a new plate')
-			raise TConfirm(self.msg)
+			pass
 		else:
 			self.current_idx_increment()
 
 	def plateComplete(self):
 		"""
-
 		"""
 		self.synchronize()
 		self.sortTransfers()
@@ -272,6 +287,41 @@ class TTWTransferProtocol(TransferProtocol):
 			if self.transfers[unique_id].status == TStatus.uncompleted:
 				return False
 		return True
+
+	def next(self, barcode):
+		"""
+		Marks the current transfer as complete if started and the next transfer as started is uncomlpete
+		if current transfer is complete, raises
+		"""
+		self.synchronize()
+
+		if self.plateComplete():
+			self.log('Plate is complete, press reset to start a new plate')
+			raise TConfirm(self.msg)
+
+		if self.canUpdate():
+			if self.isTube(barcode):
+				if self.uniqueBarcode(barcode):
+					# assign barcode to current transfer and update it as started
+					self.current_transfer['source_tube'] = barcode
+					self.current_transfer.updateStatus(TStatus.started)
+
+					# if its after the first transfer, update the previous transfer as complete
+					if self._current_idx > 0:
+						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
+						previous_transfer.updateStatus(TStatus.completed)
+
+					self.log('transfer started: %s' % self.tf_id())
+					self.step()
+				else:
+					tf = self.findTransferByBarcode(barcode)
+					self.log('Tube already scanned into well %s' % tf['dest_well'])
+					raise TError(self.msg)
+			else:
+				self.log('%s is not a valid barcode' % barcode)
+				raise TError(self.msg)
+
+		self.sortTransfers()
 
 
 	def complete(self, barcode):
