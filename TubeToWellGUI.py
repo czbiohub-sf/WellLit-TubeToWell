@@ -108,6 +108,8 @@ class TubeToWellWidget(WellLitWidget):
 					previous_transfer = self.ttw.tp.transfers[self.ttw.tp.tf_seq[self.ttw.tp._current_idx - 1]]
 					# mark current well as target
 					self.ids.dest_plate.pl.markTarget(previous_transfer['dest_well'])
+				for control_well in self.ttw.controls:
+					self.ids.dest_plate.pl.markControl(control_well)
 			self.ids.dest_plate.pl.show()
 
 	def showPopup(self, error, title: str, func=None):

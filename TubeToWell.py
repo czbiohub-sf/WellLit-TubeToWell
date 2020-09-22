@@ -28,6 +28,7 @@ class TubeToWell:
 		self.num_wells = configs['num_wells']
 		self.records_dir = configs['records_dir']
 		self.samples_dir = configs['samples_dir']
+		self.controls = configs['controls']
 		self.csv = ''
 		self.warning_file_path = ''
 
@@ -55,7 +56,7 @@ class TubeToWell:
 		self.metadata = ''
 		self.msg = ''
 		self.csv = ''
-		self.tp = TTWTransferProtocol(self)
+		self.tp = TTWTransferProtocol(self, controls=self.controls)
 		self.warningsMade = False
 		self.warning_file_path = ''
 		self.sample_list = None
@@ -145,7 +146,7 @@ class TubeToWell:
 		self.timestamp = time.strftime("%Y%m%d-%H%M%S")
 		self.plate_barcode = plate_barcode
 		self.csv = self.timestamp + '_' + self.plate_barcode + '_tube_to_plate'
-		self.tp = TTWTransferProtocol(self)
+		self.tp = TTWTransferProtocol(self, controls=self.controls)
 
 	def writeTransferRecordFiles(self):
 		"""
@@ -185,9 +186,10 @@ class TTWTransferProtocol(TransferProtocol):
 	Data model for iterating through a sequence of transfers into Wells by column order, capturing metadata
 	and tracking tube origins and transfer status
 	"""
-	def __init__(self, ttw: TubeToWell, **kwargs):
+	def __init__(self, ttw: TubeToWell, controls=None, **kwargs):
 		super(TTWTransferProtocol, self).__init__(**kwargs)
 		self.msg = ''
+		self.controls = controls
 		cwd = os.getcwd()
 		config_path = os.path.join(cwd, "wellLitConfig.json")
 		with open(config_path) as json_file:
@@ -197,33 +199,33 @@ class TTWTransferProtocol(TransferProtocol):
 		self.buildTransferProtocol(ttw)
 
 	def buildTransferProtocol(self, ttw: TubeToWell):
-		self.well_names = []
+		well_names = []
 		# build list of wells
 		if self.num_wells == '384':
-			self.well_rows = [chr(x) for x in range(ord('A'), ord('P') + 1)]
-			self.well_cols = [i for i in range(1, 25)]
+			well_rows = [chr(x) for x in range(ord('A'), ord('P') + 1)]
+			well_cols = [i for i in range(1, 25)]
 		else:
-			self.well_rows = [chr(x) for x in range(ord('A'), ord('H') + 1)]
-			self.well_cols = [i for i in range(1, 13)]
+			well_rows = [chr(x) for x in range(ord('A'), ord('H') + 1)]
+			well_cols = [i for i in range(1, 13)]
+
+		for num in well_cols:
+			for letter in well_rows:
+				well_name = letter + str(num)
+				if well_name not in self.controls:
+					well_names.append(well_name)
 
 		# build transfer protocol:
-		self.tf_seq = np.empty(int(self.num_wells), dtype=object)
-
-		for num in self.well_cols:
-			for letter in self.well_rows:
-				well_name = letter + str(num)
-				self.well_names.append(well_name)
+		self.tf_seq = np.empty(len(well_names), dtype=object)
 
 		current_idx = 0
-		for well in self.well_names:
+		for well in well_names:
 			unique_id = str(uuid.uuid1())
 			tf = Transfer(unique_id, dest_plate=ttw.plate_barcode, dest_well=well)
 			self.transfers[unique_id] = tf
 			self.tf_seq[current_idx] = unique_id
 			current_idx += 1
 
-		self._current_idx = 0  # index in tf_seq. -1 to shift the wells by one, i.e. scanning the first tube starts the
-								# first transfer and not finishes the first transfer
+		self._current_idx = 0
 		self.synchronize()
 
 	def canUpdate(self):
