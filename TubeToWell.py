@@ -119,8 +119,6 @@ class TubeToWell:
 			samples_df = pd.read_csv(filename, skiprows=1, names=['sample'], dtype=str)
 			self.sample_list = [s for s in samples_df['sample']]
 			self.log('Successfully loaded %s sample names' % len(self.sample_list))
-			for s in self.sample_list:
-				print(s)
 		except:
 			self.log('Failed to load file csv \n %s' % csv)
 			raise TError(self.msg)
@@ -229,7 +227,6 @@ class TTWTransferProtocol(TransferProtocol):
 					well_names.append(well_name)
 
 		# build transfer protocol:
-		print(well_names)
 		self.tf_seq = np.empty(len(well_names), dtype=object)
 
 		current_idx = 0
@@ -240,8 +237,6 @@ class TTWTransferProtocol(TransferProtocol):
 			self.tf_seq[current_idx] = unique_id
 			current_idx += 1
 
-		print("Tf_seq has %s ids" % len(self.tf_seq))
-		print("transfers has %s transfers" % len(self.transfers))
 		self._current_idx = 0
 		self.synchronize()
 
