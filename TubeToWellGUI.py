@@ -7,6 +7,7 @@ kivy.require('1.11.1')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
+from kivy.uix.popup import Popup
 from kivy.properties import StringProperty
 from kivy.properties import ObjectProperty, StringProperty
 from WellLit.WellLitGUI import WellLitWidget, WellLitPopup, ConfirmPopup
@@ -46,9 +47,10 @@ class TubeToWellWidget(WellLitWidget):
 		self.ids.textbox.bind(on_text_validate=self.scanRecorder)
 		self.error_popup = WellLitPopup()
 		self.confirm_popup = ConfirmPopup()
+		self.load_path = self.ttw.samples_dir
 		self.status = ''
 		self.ids.dest_plate.initialize()
-
+		self.filename = None
 
 	def _on_keyboard_up(self, keyboard, keycode, text, modifiers):
 		if keycode[1] == 'esc':
@@ -57,18 +59,55 @@ class TubeToWellWidget(WellLitWidget):
 	def quit_button(self):
 		self.showPopup('Are you sure you want to exit?', 'Confirm exit', func=self.quit)
 
+	def show_load(self):
+		content = LoadDialog(load=self.load, cancel=self.dismiss_popup, load_path=self.load_path)
+		self._popup = Popup(title='Load File', content=content)
+		self._popup.size_hint = (0.4, .8)
+		self._popup.pos_hint = {'x': 10.0 / Window.width, 'y': 100 / Window.height}
+		self._popup.open()
+
+	def load(self, filename):
+		self.dismiss_popup()
+		self.filename = filename
+		self.showPopup(TConfirm(
+			'Loading a list of samples will limit any scanned or keyed in sample IDs to only those on the loaded sample sheet. '
+			'Are you sure?'),
+			'Confirm sample name load',
+			func=self.loadSamples)
+
+	def loadSamples(self, button):
+		if self.filename:
+			filename = self.filename[0]
+		else:
+			self.showPopup(TError('Invalid target to load'), 'Unable to load file')
+
+		if os.path.isfile(str(filename)):
+			try:
+				self.ttw.loadCSV(filename)
+			except TError as err:
+				self.showPopup(err, 'Load Failed')
+			except TConfirm as conf:
+				self.showPopup(conf, 'Load Successful')
+
 	def updateLights(self):
+		"""
+		For tube to well applications, scanning a barcode will light up the well it should be pipetted into.
+		Internally that transfer is already marked as complete, and can be undone by the user.
+		Therefore the well being lit up is actually the previous transfer, i.e the one just completed.
+		"""
 		if self.ids.dest_plate.pl is not None:
 			if self.ttw.tp_present():
 				# reset all wells for each refresh
 				self.ids.dest_plate.pl.emptyWells()
+				if self.ttw.tp._current_idx > 0:
+					# mark completed wells as filled
+					for tf_id in self.ttw.tp.lists['completed']:
+						self.ids.dest_plate.pl.markFilled(self.ttw.tp.transfers[tf_id]['dest_well'])
 
-				# mark current well as target
-				self.ids.dest_plate.pl.markTarget(self.ttw.tp.current_transfer['dest_well'])
-				print(self.ttw.tp.current_transfer['dest_well'])
-				# mark completed wells as filled
-				for tf_id in self.ttw.tp.lists['completed']:
-					self.ids.dest_plate.pl.markFilled(self.ttw.tp.transfers[tf_id]['dest_well'])
+					# overwrite the previously completed transfer and mark it as the current target
+					previous_transfer = self.ttw.tp.transfers[self.ttw.tp.tf_seq[self.ttw.tp._current_idx - 1]]
+					# mark current well as target
+					self.ids.dest_plate.pl.markTarget(previous_transfer['dest_well'])
 			self.ids.dest_plate.pl.show()
 
 	def showPopup(self, error, title: str, func=None):

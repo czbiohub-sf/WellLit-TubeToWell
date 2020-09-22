@@ -9,9 +9,12 @@ import csv, time, os, re, json, uuid, logging
 from WellLit.Transfer import TStatus, TError, TConfirm, TransferProtocol, Transfer
 import numpy as np
 from pathlib import Path
+import pandas as pd
 
 class TubeToWell:
 	""" A class for mapping scanned tubes to a well location.
+
+	functions at this level throw exceptions caught by TubeToWellWidget
 	"""
 	def __init__(self):
 
@@ -24,18 +27,17 @@ class TubeToWell:
 
 		self.num_wells = configs['num_wells']
 		self.records_dir = configs['records_dir']
-		self.records_dir = configs['samples_dir']
+		self.samples_dir = configs['samples_dir']
 		self.csv = ''
 		self.warning_file_path = ''
 
 		if not os.path.isdir(self.records_dir):
 			self.records_dir = cwd + '/records/'
 
-		if not os.path.isdir(self.records_dir):
-			self.records_dir = cwd + '/samples/'
+		if not os.path.isdir(self.samples_dir):
+			self.samples_dir = cwd + '/samples/'
 
 		self.warningsMade = False
-
 		self.aliquoter = ''
 		self.recorder = ''
 		self.timestamp = ''
@@ -43,6 +45,7 @@ class TubeToWell:
 		self.metadata = ''
 		self.msg = ''
 		self.tp = None
+		self.sample_list = None
 
 	def reset(self):
 		self.aliquoter = ''
@@ -55,18 +58,24 @@ class TubeToWell:
 		self.tp = TTWTransferProtocol(self)
 		self.warningsMade = False
 		self.warning_file_path = ''
+		self.sample_list = None
 
 	def tp_present(self):
 		if self.tp is not None:
 			return True
 		else:
-			self.log('Cannot undo, finish entering metadata to begin transfer process')
+			self.log('Cannot perform action, finish entering metadata to begin transfer process')
 			raise TError(self.msg)
 
 	def next(self, barcode):
 		if self.tp_present():
-			self.tp.complete(barcode)
-			self.writeTransferRecordFiles()
+			if self.sample_list is None:
+				self.tp.complete(barcode)
+				self.writeTransferRecordFiles()
+			else:
+				self.checkSampleList(barcode)
+				self.tp.complete(barcode)
+				self.writeTransferRecordFiles()
 
 	def skip(self):
 		if self.tp_present():
@@ -90,6 +99,19 @@ class TubeToWell:
 	def log(self, msg):
 		self.msg = msg
 		logging.info(msg)
+
+	def checkSampleList(self, barcode):
+		if barcode not in self.sample_list:
+			raise TError('Sample barcode not in list of pre-defined sample names.')
+
+	def loadCSV(self, filename):
+		try:
+			# read the spreadsheet assuming first column is list of sample names, skipping the first row
+			samples_df = pd.read_csv(filename, skiprows=1, names=['sample'])
+			samples_list = [s for s in samples_df['sample']]
+		except:
+			self.log('Failed to load file csv \n %s' % csv)
+			raise TError(self.msg)
 
 	def writeWarning(self):
 		# looks back one step to mark this as undone
@@ -142,7 +164,7 @@ class TubeToWell:
 				log_writer = csv.writer(logfile)
 				log_writer.writerows(self.metadata)
 				log_writer.writerow(['Timestamp', 'Source Tube', 'Destination plate', 'Destination well', 'Status'])
-				keys = ['timestamp', 'source_tube', 'dest_plate', 'status']
+				keys = ['timestamp', 'source_tube', 'dest_plate', 'dest_well', 'status']
 				for transfer_id in self.tp.tf_seq:
 					transfer = self.tp.transfers[transfer_id]
 					if transfer['status'] is not 'uncompleted':
@@ -200,8 +222,9 @@ class TTWTransferProtocol(TransferProtocol):
 			self.tf_seq[current_idx] = unique_id
 			current_idx += 1
 
-		self._current_idx = 0  # index in tf_seq
-		self.current_uid = self.tf_seq[self._current_idx]
+		self._current_idx = 0  # index in tf_seq. -1 to shift the wells by one, i.e. scanning the first tube starts the
+								# first transfer and not finishes the first transfer
+		self.synchronize()
 
 	def canUpdate(self):
 		"""
@@ -211,8 +234,7 @@ class TTWTransferProtocol(TransferProtocol):
 		"""
 		self.synchronize()
 		self.sortTransfers()
-		current_transfer = self.transfers[self.current_uid]
-		if current_transfer['timestamp'] is None:
+		if self.current_transfer['timestamp'] is None:
 			return True
 		else:
 			self.log('Cannot update transfer: %s Status is already marked as %s ' %
@@ -232,7 +254,6 @@ class TTWTransferProtocol(TransferProtocol):
 		"""
 		self.sortTransfers()
 		self.canUndo = True
-
 		if self.plateComplete():
 			self.log('Plate is complete, press reset to start a new plate')
 			raise TConfirm(self.msg)
@@ -265,8 +286,8 @@ class TTWTransferProtocol(TransferProtocol):
 		if self.canUpdate():
 			if self.isTube(barcode):
 				if self.uniqueBarcode(barcode):
-					self.transfers[self.current_uid]['source_tube'] = barcode
-					self.transfers[self.current_uid].updateStatus(TStatus.completed)
+					self.current_transfer['source_tube'] = barcode
+					self.current_transfer.updateStatus(TStatus.completed)
 					self.log('transfer complete: %s' % self.tf_id())
 					self.step()
 				else:
