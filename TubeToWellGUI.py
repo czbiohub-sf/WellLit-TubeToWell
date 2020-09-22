@@ -171,6 +171,7 @@ class TubeToWellWidget(WellLitWidget):
 			self.ids.dest_plate.pl.emptyWells()
 
 		self.ttw.reset()
+		self.updateLights()
 
 	def showBarcodeError(self, barcode_type):
 		self.error_popup.title =  "Barcode Error"
