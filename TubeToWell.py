@@ -273,6 +273,30 @@ class TTWTransferProtocol(TransferProtocol):
 		else:
 			self.current_idx_increment()
 
+	def undo(self):
+		"""
+		Overwrites default undo action to step back twice, overwrite the completed transfer and mark as started,
+		then step forwards and mark the started transfer as uncomplete
+		"""
+		self.synchronize()
+		self.sortTransfers()
+		if self.canUndo:
+			self.current_idx_decrement()
+			self.current_idx_decrement()
+
+			if self._current_idx > 0:
+				self.current_transfer.updateStatus(TStatus.started)
+				self.current_idx_increment()
+				self.current_transfer.resetTransfer()
+			else:
+				self.current_transfer.resetTransfer()
+			self.sortTransfers()
+			self.canUndo = False
+			self.log('transfer marked incomplete: %s' % self.tf_id())
+		else:
+			self.log('Cannot undo previous operation')
+			raise TError('Cannot undo previous operation')
+
 	def plateComplete(self):
 		"""
 		"""
