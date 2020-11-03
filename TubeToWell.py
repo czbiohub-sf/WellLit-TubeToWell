@@ -39,8 +39,6 @@ class TubeToWell:
 			self.samples_dir = cwd + '/samples/'
 
 		self.warningsMade = False
-		self.aliquoter = ''
-		self.recorder = ''
 		self.timestamp = ''
 		self.plate_barcode = ''
 		self.metadata = ''
@@ -50,8 +48,6 @@ class TubeToWell:
 		self.tp = TTWTransferProtocol(self, controls=self.controls)
 
 	def reset(self):
-		self.aliquoter = ''
-		self.recorder = ''
 		self.timestamp = ''
 		self.plate_barcode = ''
 		self.metadata = ''
@@ -151,12 +147,10 @@ class TubeToWell:
 			writer.writerow(['Timestamp', 'Source Tube', 'Destination well'])
 			csvFile.close()
 
-	def setMetaData(self, recorder, aliquoter, plate_barcode):
+	def setMetaData(self, plate_barcode):
 		"""
 		Sets metadata for records produced and assigns a new Transfer Protocol to this class
 		"""
-		self.aliquoter = aliquoter
-		self.recorder = recorder
 		self.timestamp = time.strftime("%Y%m%d-%H%M%S")
 		self.plate_barcode = plate_barcode
 		self.csv = self.timestamp + '_' + self.plate_barcode + '_tube_to_plate'
@@ -170,8 +164,6 @@ class TubeToWell:
 		# use the first 5 rows of the output file for metadata
 		self.metadata = [['%Plate Timestamp: ', self.timestamp],
 						 ['%Plate Barcode: ', self.plate_barcode],
-						 ['%Recorder Name: ', self.recorder],
-						 ['%Aliquoter Name: ', self.aliquoter],
 						 ['%Timestamp', 'Tube Barcode', 'Location']]
 		try:
 			with open(record_path_filename, 'w', newline='') as logfile:
@@ -209,6 +201,7 @@ class TTWTransferProtocol(TransferProtocol):
 
 		self.num_wells = configs['num_wells']
 		self.buildTransferProtocol(ttw)
+		self.lightup_well = None               # special well that can be lit up under different edge cases (e.g. rescan)
 
 	def buildTransferProtocol(self, ttw: TubeToWell):
 		well_names = []
@@ -331,10 +324,12 @@ class TTWTransferProtocol(TransferProtocol):
 						previous_transfer.updateStatus(TStatus.completed)
 
 					self.log('transfer started: %s' % self.tf_id())
+					self.lightup_well = None
 					self.step()
 				else:
 					tf = self.findTransferByBarcode(barcode)
 					self.log('Tube already scanned into well %s' % tf['dest_well'])
+					self.lightup_well = tf['dest_well']
 					raise TError(self.msg)
 			else:
 				self.log('%s is not a valid barcode' % barcode)

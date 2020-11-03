@@ -44,7 +44,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.ttw = TubeToWell()
 		self.ids.textbox.bind(focus=on_focus)
 		self.scanMode = False
-		self.ids.textbox.bind(on_text_validate=self.scanRecorder)
+		self.ids.textbox.bind(on_text_validate=self.scanPlate)
 		self.error_popup = WellLitPopup()
 		self.confirm_popup = ConfirmPopup()
 		self.load_path = self.ttw.samples_dir
@@ -112,6 +112,10 @@ class TubeToWellWidget(WellLitWidget):
 				for control_well in self.ttw.controls:
 					self.ids.dest_plate.pl.markControl(control_well)
 
+				if self.ttw.tp.lightup_well is not None:
+					self.ids.dest_plate.pl.markRescan(self.ttw.tp.lightup_well)
+
+
 			# update and show plot
 			self.ids.dest_plate.pl.show()
 
@@ -132,9 +136,12 @@ class TubeToWellWidget(WellLitWidget):
 		except TError as err:
 			self.showPopup(err, "Unable to complete")
 			self.status = self.ttw.msg
+			self.updateLights()
 		except TConfirm as conf:
+			self.ttw.writeTransferRecordFiles()
 			self.showPopup(conf, "Plate complete")
 			self.status = self.ttw.msg
+			self.updateLights()
 
 	def undoTube(self):
 		try:
@@ -143,6 +150,8 @@ class TubeToWellWidget(WellLitWidget):
 			self.showPopup('Previous tube un-scanned', "Action undone")
 			self.status = self.ttw.msg
 		except TError as err:
+			self.ttw.writeTransferRecordFiles()
+			self.updateLights()
 			self.showPopup(err, "Unable to undo")
 			self.status = self.ttw.msg
 
@@ -156,13 +165,11 @@ class TubeToWellWidget(WellLitWidget):
 		self.ids.textbox.funbind('on_text_validate', self.scanAliquoter)
 		self.ids.textbox.funbind('on_text_validate', self.scanPlate)
 		self.ids.textbox.bind(on_text_validate=self.scanRecorder)
-		self.ids.status.text = "Please scan the recorder's barcode"
+		self.ids.status.text = "Please scan or key in the plate barcode"
 
 		# reset metadata text
-		self.ids.recorder_label.text = '[b]Recorder:[/b] \n'
-		self.ids.aliquoter_label.text = '[b]Aliquoter:[/b] \n'
-		self.ids.plate_barcode_label.text = '[b]Plate Barcode:[/b] \n'
-		self.ids.tube_barcode_label.text = '[b]Tube Barcode:[/b] \n'
+		self.ids.plate_barcode_label.text = 'Plate Barcode: \n'
+		self.ids.tube_barcode_label.text = 'Tube Barcode: \n'
 		self.ids.status.font_size = 50
 
 		self.scanMode = False
@@ -178,44 +185,10 @@ class TubeToWellWidget(WellLitWidget):
 		self.error_popup.show('Not a valid ' + barcode_type +' barcode')
 		self.ids.textbox.text = ''
 
-	def scanRecorder(self, *args):
-		"""
-		First step when starting a new plate. Checks to see if its a valid name with no numbers
-		"""
-		check_input = self.ids.textbox.text
-		if self.ttw.isName(check_input):
-			self.recorder = check_input
-			self.ids.recorder_label.text += check_input 
-			self.ids.textbox.text = ''
-
-			# bind textbox to scanPlate after name is scanned
-			self.ids.textbox.funbind('on_text_validate',self.scanRecorder)
-			self.ids.textbox.bind(on_text_validate=self.scanAliquoter)
-			self.ids.status.text = "Please scan the aliquoter's barcode"
-		else: 
-			self.showBarcodeError('name')
-
-	def scanAliquoter(self, *args):
-		"""
-		Second step when starting a new plate. Checks to see if its a valid name with no numbers
-		"""
-		check_input = self.ids.textbox.text
-		if self.ttw.isName(check_input):
-			self.aliquoter = check_input
-			self.ids.aliquoter_label.text += check_input 
-			self.ids.textbox.text = ''
-
-			# bind textbox to scanPlate after name is scanned
-			self.ids.textbox.funbind('on_text_validate',self.scanAliquoter)
-			self.ids.textbox.bind(on_text_validate=self.scanPlate)
-			self.ids.status.text = 'Please scan plate'
-		else: 
-			self.showBarcodeError('name')
-
 
 	def scanPlate(self, *args):
 		"""
-		Third step when starting a new plate.
+		First step when starting a new plate.
 		Passes metadata to TubeToWell class to generate record files and transfer sequence
 		"""
 		check_input = self.ids.textbox.text
@@ -224,7 +197,7 @@ class TubeToWellWidget(WellLitWidget):
 			self.ids.plate_barcode_label.text += check_input 
 			self.ids.textbox.text = ''
 
-			self.ttw.setMetaData(recorder=self.recorder, aliquoter=self.aliquoter, plate_barcode=self.plate_barcode)
+			self.ttw.setMetaData(plate_barcode=self.plate_barcode)
 
 			# set up text file confirmation
 			self.txt_file_path = os.path.join(self.ttw.csv +'_FINISHED.txt')
@@ -245,5 +218,5 @@ class TubeToWellWidget(WellLitWidget):
 		
 if __name__ == '__main__':
 	Window.size =(1600, 1200)
-	Window.fullscreen = True
+	# Window.fullscreen = True
 	TubeToWellApp().run()
