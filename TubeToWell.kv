@@ -60,15 +60,21 @@
 				id: plate_barcode_label
 				text: 'Plate Barcode:'
 				font_name: 'Roboto-Bold'
-				font_size: 25
+				font_size: 35
+			Label:
+			    id: plate_barcode
+			    font_size: 25
+			    text: ''
+            Label:
+				id: tube_barcode_label
+                text: 'Tube Barcode:'
+				font_name: 'Roboto-Bold'
+				font_size: 35
 			Label:
 				id: tube_barcode
-				text: 'Tube Barcode:'
-				font_name: 'Roboto-Bold'
+				text: ''
 				font_size: 25
-			Label:
-				id: tube_barcode_label
-				font_size: 50
+
 			Button:
 			    text: 'Load Sample List'
 			    on_press: root.show_load()

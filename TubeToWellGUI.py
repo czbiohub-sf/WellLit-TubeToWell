@@ -115,7 +115,6 @@ class TubeToWellWidget(WellLitWidget):
 				if self.ttw.tp.lightup_well is not None:
 					self.ids.dest_plate.pl.markRescan(self.ttw.tp.lightup_well)
 
-
 			# update and show plot
 			self.ids.dest_plate.pl.show()
 
@@ -128,7 +127,7 @@ class TubeToWellWidget(WellLitWidget):
 
 	def next(self, blank):
 		barcode = self.ids.textbox.text
-		self.ids.tube_barcode = barcode
+		self.ids.tube_barcode.text = barcode
 		self.ids.textbox.text = ''
 		try:
 			self.ttw.next(barcode)
@@ -169,7 +168,7 @@ class TubeToWellWidget(WellLitWidget):
 
 		# reset metadata text
 		self.ids.plate_barcode_label.text = 'Plate Barcode: \n'
-		self.ids.tube_barcode_label.text = 'Tube Barcode: \n'
+		self.ids.tube_barcode_label.text = 'Tube Barcode sss: \n'
 		self.ids.status.font_size = 50
 
 		self.scanMode = False
@@ -194,7 +193,7 @@ class TubeToWellWidget(WellLitWidget):
 		check_input = self.ids.textbox.text
 		if self.ttw.isPlate(check_input):
 			self.plate_barcode = check_input
-			self.ids.plate_barcode_label.text += check_input 
+			self.ids.plate_barcode.text = check_input
 			self.ids.textbox.text = ''
 
 			self.ttw.setMetaData(plate_barcode=self.plate_barcode)

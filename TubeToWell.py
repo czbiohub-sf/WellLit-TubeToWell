@@ -323,10 +323,17 @@ class TTWTransferProtocol(TransferProtocol):
 						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
 						previous_transfer.updateStatus(TStatus.completed)
 
+					self.sortTransfers()
 					self.log('transfer started: %s' % self.tf_id())
 					self.lightup_well = None
 					self.step()
 				else:
+
+					if self._current_idx > 0:
+						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
+						previous_transfer.updateStatus(TStatus.completed)
+
+					self.sortTransfers()
 					tf = self.findTransferByBarcode(barcode)
 					self.log('Tube already scanned into well %s' % tf['dest_well'])
 					self.lightup_well = tf['dest_well']
