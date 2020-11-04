@@ -44,13 +44,14 @@ class TubeToWellWidget(WellLitWidget):
 		self.ttw = TubeToWell()
 		self.ids.textbox.bind(focus=on_focus)
 		self.scanMode = False
-		self.ids.textbox.bind(on_text_validate=self.scanPlate)
+		self.ids.textbox.bind(on_text_validate=self.scanUser)
 		self.error_popup = WellLitPopup()
 		self.confirm_popup = ConfirmPopup()
 		self.load_path = self.ttw.samples_dir
 		self.status = ''
 		self.ids.dest_plate.initialize()
 		self.filename = None
+		self.user = ''
 
 	def _on_keyboard_up(self, keyboard, keycode, text, modifiers):
 		if keycode[1] == 'esc':
@@ -184,6 +185,22 @@ class TubeToWellWidget(WellLitWidget):
 		self.error_popup.show('Not a valid ' + barcode_type +' barcode')
 		self.ids.textbox.text = ''
 
+	def scanUser(self, *args):
+		"""
+		First step when starting a new plate. Checks to see if its a valid name with no numbers
+		"""
+		check_input = self.ids.textbox.text
+		if self.ttw.isName(check_input):
+			self.user = check_input
+			self.ids.user.text = check_input
+			self.ids.textbox.text = ''
+
+			# bind textbox to scanPlate after name is scanned
+			self.ids.textbox.funbind('on_text_validate', self.scanUser)
+			self.ids.textbox.bind(on_text_validate=self.scanPlate)
+			self.ids.status.text = "Please scan or key in plate barcode"
+		else:
+			self.showBarcodeError('name')
 
 	def scanPlate(self, *args):
 		"""
@@ -196,7 +213,7 @@ class TubeToWellWidget(WellLitWidget):
 			self.ids.plate_barcode.text = check_input
 			self.ids.textbox.text = ''
 
-			self.ttw.setMetaData(plate_barcode=self.plate_barcode)
+			self.ttw.setMetaData(plate_barcode=self.plate_barcode, user=self.user)
 
 			# set up text file confirmation
 			self.txt_file_path = os.path.join(self.ttw.csv +'_FINISHED.txt')

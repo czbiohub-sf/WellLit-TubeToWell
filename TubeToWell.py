@@ -43,6 +43,7 @@ class TubeToWell:
 		self.plate_barcode = ''
 		self.metadata = ''
 		self.msg = ''
+		self.user = ''
 		self.tp = None
 		self.sample_list = None
 		self.tp = TTWTransferProtocol(self, controls=self.controls)
@@ -52,6 +53,7 @@ class TubeToWell:
 		self.plate_barcode = ''
 		self.metadata = ''
 		self.msg = ''
+		self.user = ''
 		self.csv = ''
 		self.tp = TTWTransferProtocol(self, controls=self.controls)
 		self.warningsMade = False
@@ -147,10 +149,11 @@ class TubeToWell:
 			writer.writerow(['Timestamp', 'Source Tube', 'Destination well'])
 			csvFile.close()
 
-	def setMetaData(self, plate_barcode):
+	def setMetaData(self, plate_barcode, user):
 		"""
 		Sets metadata for records produced and assigns a new Transfer Protocol to this class
 		"""
+		self.user = user
 		self.timestamp = time.strftime("%Y%m%d-%H%M%S")
 		self.plate_barcode = plate_barcode
 		self.csv = self.timestamp + '_' + self.plate_barcode + '_tube_to_plate'
@@ -163,6 +166,7 @@ class TubeToWell:
 
 		# use the first 5 rows of the output file for metadata
 		self.metadata = [['%Plate Timestamp: ', self.timestamp],
+						 ['%Username: ', self.user],
 						 ['%Plate Barcode: ', self.plate_barcode],
 						 ['%Timestamp', 'Tube Barcode', 'Location']]
 		try:
