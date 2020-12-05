@@ -99,15 +99,20 @@ class TubeToWellWidget(WellLitWidget):
 			if self.ttw.tp_present():
 				# reset all wells for each refresh
 				self.ids.dest_plate.pl.emptyWells()
-				if self.ttw.tp._current_idx > 0:
-					# mark completed wells as filled
-					for tf_id in self.ttw.tp.lists['completed']:
-						self.ids.dest_plate.pl.markFilled(self.ttw.tp.transfers[tf_id]['dest_well'])
 
-					# overwrite the previously completed transfer and mark it as the current target
-					previous_transfer = self.ttw.tp.transfers[self.ttw.tp.tf_seq[self.ttw.tp._current_idx - 1]]
-					# mark current well as target
-					self.ids.dest_plate.pl.markTarget(previous_transfer['dest_well'])
+				# mark completed wells as filled
+				for tf_id in self.ttw.tp.lists['completed']:
+					self.ids.dest_plate.pl.markFilled(self.ttw.tp.transfers[tf_id]['dest_well'])
+
+				# mark current in-progress transfer as the target
+				for tf_id in self.ttw.tp.lists['started']:
+					self.ids.dest_plate.pl.markTarget(self.ttw.tp.transfers[tf_id]['dest_well'])
+
+				# mark the control wells
+				for control_well in self.ttw.controls:
+					self.ids.dest_plate.pl.markControl(control_well)
+
+			# update and show plot
 			self.ids.dest_plate.pl.show()
 
 	def showPopup(self, error, title: str, func=None):
@@ -164,6 +169,8 @@ class TubeToWellWidget(WellLitWidget):
 
 		if self.ids.dest_plate.pl is not None:
 			self.ids.dest_plate.pl.emptyWells()
+
+		self.ttw.reset()
 
 	def showBarcodeError(self, barcode_type):
 		self.error_popup.title =  "Barcode Error"
@@ -228,6 +235,7 @@ class TubeToWellWidget(WellLitWidget):
 
 			self.ids.status.text = 'Please scan tube'
 			self.scanMode = True
+			self.updateLights()
 
 		else: 
 			self.showBarcodeError('plate')
