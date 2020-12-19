@@ -312,7 +312,7 @@ class TTWTransferProtocol(TransferProtocol):
 		self.synchronize()
 
 		if self.plateComplete():
-			self.log('Plate is complete, press reset to start a new plate')
+			self.log('Plate is complete, press Finish Plate to start a new plate')
 			raise TConfirm(self.msg)
 
 		if self.canUpdate():
