@@ -49,15 +49,15 @@ The top area of the screen contains the main user interface, while the bottom di
 5. Insert the plate into the holder. Ensure that the A1 well is in the top left corner of the holder (the holder for each type of multi-well plate is designed to ensure that the plate can only be inserted in the right orientation).
 6. If the user wishes to restrict tube barcodes to come from a pre-defined list, for example to guard against errors when manually typing by hand or segregating tubes by batches that may have been mixed up, press “Load Sample List” to select a CSV file of tube barcodes. Only barcodes from this list will be accepted by the machine for assigning to a well.
 7. Each user action is recorded with a timestamp in a CSV file saved to the folder specified in the the 'wellLitConfig.json' configuration file ('records_dir' parameter - see Software Configuration section).
-8. Wells are highlighted with the following colors:
-    a. Yellow: Current transfer target well
-    b. Red: Full wells
-    c. Gray: Empty wells
-    d. Blue: Re-scanned sample well (full)
+8. Wells are highlighted with the following colors:<br/>
+    a. Yellow: Current transfer target well<br/>
+    b. Red: Full wells<br/>
+    c. Gray: Empty wells<br/>
+    d. Blue: Re-scanned sample well (full)<br/>
     e. White: Excluded/control wells (see software configuration section)
-9. Tube to Well-Lit sample transfer procedure:
-    a. Scan or type a tube name or barcode to light up the first available well in yellow. This is the target well. Wells are assigned to the tubes in a column-wise order (i.e. A1, B1, C1, ... A2, B2, C2, ...).
-    b. After transferring an aliquot from the tube to the target (yellow) well, scan or enter the next tube's barcode to mark the previous transfer as complete and light up the next available well. The filled wells will be lit in red.
-    c. Re-scanning a previously scanned tube will light its assigned well in blue.
+9. Tube to Well-Lit sample transfer procedure:<br/>
+    a. Scan or type a tube name or barcode to light up the first available well in yellow. This is the target well. Wells are assigned to the tubes in a column-wise order (i.e. A1, B1, C1, ... A2, B2, C2, ...).<br/>
+    b. After transferring an aliquot from the tube to the target (yellow) well, scan or enter the next tube's barcode to mark the previous transfer as complete and light up the next available well. The filled wells will be lit in red.<br/>
+    c. Re-scanning a previously scanned tube will light its assigned well in blue.<br/>
     d. The last transfer can be undone with the “Undo Last Tube” button. The undone transfer is not included in the record file generated. You cannot undo more than one transfer per scan.
 10. Press “Finish Plate” when all the transfers have been completed. The program will automatically start a new record file for the next plate. For a new plate, follow the instructions starting at step 4 for the new plate.
