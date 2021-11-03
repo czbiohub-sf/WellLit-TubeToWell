@@ -33,7 +33,7 @@ class LoadDialog(FloatLayout):
 	load_path = StringProperty('')
 
 class ChooseSaveDirDialog(FloatLayout):
-	location = ObjectProperty(None)
+	choose = ObjectProperty(None)
 	cancel = ObjectProperty(None)
 	save_dir = StringProperty('')
 
@@ -97,7 +97,7 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(conf, 'Load Successful')
 
 	def showChooseSaveDirectory(self):
-		content = ChooseSaveDirDialog(location=self.chooseDirectory, cancel=self.dismiss_popup, )
+		content = ChooseSaveDirDialog(choose=self.chooseDirectory, cancel=self.dismiss_popup, )
 		self._popup = Popup(title='Load File', content=content)
 		self._popup.size_hint = (0.4, .8)
 		self._popup.pos_hint = {'x': 10.0 / Window.width, 'y': 100 / Window.height}
