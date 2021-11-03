@@ -114,7 +114,7 @@ class TubeToWellWidget(WellLitWidget):
 
 	def _chooseDirectory(self, _):
 		if self.save_directory:
-			directory = self.save_directory[0]
+			directory = self.save_directory
 		else:
 			self.showPopup(TError("Invalid save directory location."), "Unable to set save directory")
 		
