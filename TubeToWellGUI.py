@@ -198,9 +198,7 @@ class TubeToWellWidget(WellLitWidget):
 	def resetAll(self, button):
 		# restart metadata collection
 		self.ids.textbox.funbind('on_text_validate', self.next)
-		self.ids.textbox.funbind('on_text_validate', self.scanAliquoter)
 		self.ids.textbox.funbind('on_text_validate', self.scanPlate)
-		self.ids.textbox.bind(on_text_validate=self.scanRecorder)
 		self.ids.status.text = "Please scan or key in the plate barcode"
 
 		# reset metadata text
@@ -270,5 +268,5 @@ class TubeToWellWidget(WellLitWidget):
 		
 if __name__ == '__main__':
 	Window.size =(1600, 1200)
-	# Window.fullscreen = True
+	Window.fullscreen = True
 	TubeToWellApp().run()
