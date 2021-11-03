@@ -105,7 +105,7 @@ class TubeToWellWidget(WellLitWidget):
 
 	def chooseDirectory(self, directory):
 		self.dismiss_popup()
-		self.save_directory = directory
+		self.save_directory = directory + "/"
 		self.showPopup(TConfirm(
 			f'The outputted csv file will be saved to: {directory}. '
 			'Are you sure?'),
