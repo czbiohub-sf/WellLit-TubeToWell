@@ -43,7 +43,26 @@
             Button:
                 text: 'Load'
                 on_release: root.load(filechooser.selection)
+				
+<ChooseSaveDirDialog>:
+	BoxLayout:
+    	size_hint: 0.8,0.2
+	    pos_hint: {'left': 1, 'top': 1}
+        orientation: 'vertical'
+        FileChooserListView:
+            id: filechooser
+            path: root.load_path
 
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: 'Cancel'
+                on_release: root.cancel()
+            Button:
+                text: 'Choose folder'
+                on_release: root.chooseDirectory(filechooser.path)
 
 <TubeToWellWidget>:
 	orientation: 'vertical'
@@ -87,6 +106,10 @@
 			Button:
 			    text: 'Load Sample List'
 			    on_press: root.show_load()
+
+			Button:
+				text: 'Choose custom save location'
+				on_press: root.showChooseSaveDirectory()
 
 	    Label:
 	    	id: status

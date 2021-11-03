@@ -121,6 +121,10 @@ class TubeToWell:
 			self.log('Failed to load file csv \n %s' % csv)
 			raise TError(self.msg)
 
+	def setSaveDirectory(self, directory):
+		"""Sets the location to save records """
+		self.records_dir = directory
+
 	def writeWarning(self):
 		""""
 		Generates warning file of undone transfers

@@ -32,6 +32,11 @@ class LoadDialog(FloatLayout):
 	cancel = ObjectProperty(None)
 	load_path = StringProperty('')
 
+class ChooseSaveDirDialog(FloatLayout):
+	location = ObjectProperty(None)
+	cancel = ObjectProperty(None)
+	save_dir = StringProperty('')
+
 class TubeToWellWidget(WellLitWidget):
 	"""
 	Scans barcoded tubes and assigns the contents to wells in sequential order on a well plate of either 96 or 384 wells.
@@ -51,6 +56,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.status = ''
 		self.ids.dest_plate.initialize()
 		self.filename = None
+		self.save_directory = None
 		self.user = ''
 
 	def _on_keyboard_up(self, keyboard, keycode, text, modifiers):
@@ -89,6 +95,36 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(err, 'Load Failed')
 			except TConfirm as conf:
 				self.showPopup(conf, 'Load Successful')
+
+	def showChooseSaveDirectory(self):
+		content = ChooseSaveDirDialog(location=self.chooseDirectory, cancel=self.dismiss_popup, )
+		self._popup = Popup(title='Load File', content=content)
+		self._popup.size_hint = (0.4, .8)
+		self._popup.pos_hint = {'x': 10.0 / Window.width, 'y': 100 / Window.height}
+		self._popup.open()
+
+	def chooseDirectory(self, directory):
+		self.dismiss_popup()
+		self.save_directory = directory
+		self.showPopup(TConfirm(
+			f'The outputted csv file will be saved to: {directory}. '
+			'Are you sure?'),
+			'Confirm save directory location',
+			func=self.loadSamples)
+
+	def _chooseDirectory(self):
+		if self.save_directory:
+			directory = self.save_directory[0]
+		else:
+			self.showPopup(TError("Invalid save directory location."), "Unable to set save directory")
+		
+		if os.path.isdir(directory):
+			try:
+				self.ttw.setSaveDirectory(directory)
+			except TError as err:
+				self.showPopup(err, 'Failed to set directory')
+			except TConfirm as conf:
+				self.showPopup(conf, "Directory set")
 
 	def updateLights(self):
 		"""
