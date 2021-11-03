@@ -112,7 +112,7 @@ class TubeToWellWidget(WellLitWidget):
 			'Confirm save directory location',
 			func=self._chooseDirectory)
 
-	def _chooseDirectory(self):
+	def _chooseDirectory(self, _):
 		if self.save_directory:
 			directory = self.save_directory[0]
 		else:
