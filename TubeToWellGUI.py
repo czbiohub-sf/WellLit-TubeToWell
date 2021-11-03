@@ -110,7 +110,7 @@ class TubeToWellWidget(WellLitWidget):
 			f'The outputted csv file will be saved to: {directory}. '
 			'Are you sure?'),
 			'Confirm save directory location',
-			func=self.loadSamples)
+			func=self._chooseDirectory)
 
 	def _chooseDirectory(self):
 		if self.save_directory:
