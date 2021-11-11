@@ -203,7 +203,7 @@ class TubeToWellWidget(WellLitWidget):
 
 		# reset metadata text
 		self.ids.plate_barcode_label.text = 'Plate Barcode: \n'
-		self.ids.tube_barcode_label.text = 'Tube Barcode sss: \n'
+		self.ids.tube_barcode_label.text = 'Tube Barcode: \n'
 		self.ids.status.font_size = 50
 
 		self.scanMode = False
