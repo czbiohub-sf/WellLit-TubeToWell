@@ -97,9 +97,9 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(conf, 'Load Successful')
 
 	def showChooseSaveDirectory(self):
-		content = ChooseSaveDirDialog(choose=self.chooseDirectory, cancel=self.dismiss_popup, )
-		self._popup = Popup(title='Load File', content=content)
-		self._popup.size_hint = (0.4, .8)
+		content = ChooseSaveDirDialog(choose=self.chooseDirectory, cancel=self.dismiss_popup, save_dir=self.load_path)
+		self._popup = Popup(title='Choose folder', content=content)
+		self._popup.size_hint = (0.4, 0.8)
 		self._popup.pos_hint = {'x': 10.0 / Window.width, 'y': 100 / Window.height}
 		self._popup.open()
 
@@ -115,16 +115,16 @@ class TubeToWellWidget(WellLitWidget):
 	def _chooseDirectory(self, _):
 		if self.save_directory:
 			directory = self.save_directory
+
+			if os.path.isdir(directory):
+				try:
+					self.ttw.setSaveDirectory(directory)
+				except TError as err:
+					self.showPopup(err, "Failed to set directory")
+				except TConfirm as conf:
+					self.showPopup(conf, "Directory set")
 		else:
 			self.showPopup(TError("Invalid save directory location."), "Unable to set save directory")
-		
-		if os.path.isdir(directory):
-			try:
-				self.ttw.setSaveDirectory(directory)
-			except TError as err:
-				self.showPopup(err, 'Failed to set directory')
-			except TConfirm as conf:
-				self.showPopup(conf, "Directory set")
 
 	def updateLights(self):
 		"""
