@@ -29,6 +29,7 @@ class TubeToWell:
 		self.records_dir = configs['records_dir']
 		self.samples_dir = configs['samples_dir']
 		self.controls = configs['controls']
+		self.barcode_to_well = {}
 		self.csv = ''
 		self.warning_file_path = ''
 
@@ -73,6 +74,16 @@ class TubeToWell:
 		marks the current scanned barcode as complete and writes transfer record file
 		"""
 		if self.tp_present():
+
+			# First check to see if this is a specifically assigned barcode
+			# (i.e a tube that should go to a specific well)
+			if barcode in self.barcode_to_well.keys():
+				if self.tp.uniqueBarcode(barcode):
+					unique_id  = str(uuid.uuid1())
+					well = self.barcode_to_well[barcode]
+					tf = Transfer(unique_id, dest_plate=self.plate_barcode, dest_well=well)
+					self.tp.tf_seq.insert(self.tp._current_idx, tf)
+
 			if self.sample_list is None:
 				self.tp.next(barcode)
 				self.writeTransferRecordFiles()
@@ -120,6 +131,71 @@ class TubeToWell:
 		except:
 			self.log('Failed to load file csv \n %s' % csv)
 			raise TError(self.msg)
+
+	def loadWellConfigurationCSV(self, filename):
+		"""Loads a well configuration csv/excel sheet.
+
+		This sheet uses a pre-defined template which maps well numbers (e.g A1/A2/D3/H5, etc.)
+		to their availability (i.e whether a sample can be pipetted into that well or not).
+		Additionally instead of marking a well as "Available" or "Not Available", users can also map a well
+		to a specific sample barcode. If a well is mapped to a specific barcode, only the sample with the corresponding barcode
+		can be aliquoted into that well.
+		"""
+
+		try:
+			wells_config_df = pd.read_csv(filename, header=0, names=["wells", "availability", "barcodes"])
+		except:
+			self.log(f"Failed to load well configuration csv (tried to load {filename}).")
+			raise TError(self.msg)
+
+		self.parseWellConfigurationCSV(wells_config_df)
+
+	def parseWellConfigurationCSV(self, wells_config_df):
+		"""Parses the well_configuration.csv and performs some basic input validation.
+
+		Note that by default wells are assumed to be available (i.e you don't need to explicitly mark
+		wells as being "Available" in the csv, however there is no harm in doing so). Only wells that 
+		should be exempt from aliquoting or wells which map to a specific tube need to be stated in the CSV sheet.
+
+		If there are any input errors, this function will fail and raise a specific error alerting the user 
+		of the error(s) in the csv sheet that need to be rectified.
+		"""
+		valid_wells = self.tp.generateWellList()
+
+		# Clean-up data
+		wells_config_df["wells"] = wells_config_df["wells"].str.upper()
+		wells_config_df["availability"] = wells_config_df["availability"].str.upper()
+
+		# First validate that the user entered wells are valid
+		invalid_wells = ~wells_config_df["wells"].isin(valid_wells)
+		if any(invalid_wells):
+			list_of_invalid_rows = wells_config_df[invalid_wells]
+			self.log(f"Invalid well(s) encountered in column A: {list_of_invalid_rows}).")
+			raise TError(self.msg)
+
+		# Well names are valid, next check available/not available column for invalid entries
+		invalid_availability = ~wells_config_df["availability"].isin(["AVAILABLE", "NOT AVAILABLE"])
+		if any(invalid_availability):
+			list_of_invalid_rows = wells_config_df[invalid_availability]
+			self.log(f"Invalid Available/Not Available entry in column B: {list_of_invalid_rows}")
+			raise TError(self.msg)
+
+		# Add the unavailable wells and mark the wells reserved for specific barcodes
+		for _, row in wells_config_df.iterrows():
+			well_number = row["wells"]
+			availability = row["availability"]
+			barcode = row["barcode"]
+
+			if availability == "NOT AVAILABLE" and barcode != None:
+				self.log(f"A well has been specified as 'Not Available' AND a barcode has been assigned to this well. \
+							Only one or the other should be assigned. Please fix this in the sheet and try again.\
+							This issue was found on the row with: {well_number, availability, barcode}")
+				raise TError(self.msg)
+			elif availability == "NOT AVAILABLE":
+				self.controls += well_number
+			elif barcode != None:
+				self.barcode_to_well[barcode] = well_number
+		
 
 	def setSaveDirectory(self, directory):
 		"""Sets the location to save records """
@@ -211,7 +287,8 @@ class TTWTransferProtocol(TransferProtocol):
 		self.buildTransferProtocol(ttw)
 		self.lightup_well = None               # special well that can be lit up under different edge cases (e.g. rescan)
 
-	def buildTransferProtocol(self, ttw: TubeToWell):
+	def generateWellList(self):
+		"""Returns a list of well names (e.g A1, A2, etc.) (depending on whether a 96/384 well plate is used)."""
 		well_names = []
 		# build list of wells
 		if self.num_wells == '384':
@@ -224,18 +301,27 @@ class TTWTransferProtocol(TransferProtocol):
 		for num in well_cols:
 			for letter in well_rows:
 				well_name = letter + str(num)
-				if well_name not in self.controls:
-					well_names.append(well_name)
+				well_names.append(well_name)
+
+		return well_names
+
+	def buildTransferProtocol(self, ttw: TubeToWell):
+		well_names = self.generateWellList()
+		valid_well_names = []
+		for well_name in well_names:
+			if (well_name not in self.controls) and (well_name not in ttw.barcode_to_well.keys()):
+				valid_well_names.append(well_name)
 
 		# build transfer protocol:
-		self.tf_seq = np.empty(len(well_names), dtype=object)
+		self.tf_seq = []
 
 		current_idx = 0
-		for well in well_names:
+		for well in valid_well_names:
 			unique_id = str(uuid.uuid1())
+			# TODO set well here (check dictionary for barcode -> well mapping, otherwise just use the next well)
 			tf = Transfer(unique_id, dest_plate=ttw.plate_barcode, dest_well=well)
 			self.transfers[unique_id] = tf
-			self.tf_seq[current_idx] = unique_id
+			self.tf_seq.append(unique_id)
 			current_idx += 1
 
 		self._current_idx = 0
@@ -310,7 +396,7 @@ class TTWTransferProtocol(TransferProtocol):
 
 	def next(self, barcode):
 		"""
-		Marks the current transfer as complete if started and the next transfer as started is uncomlpete
+		Marks the current transfer as complete if started and the next transfer as started is uncomplete
 		if current transfer is complete, raises
 		"""
 		self.synchronize()
@@ -326,7 +412,7 @@ class TTWTransferProtocol(TransferProtocol):
 					self.current_transfer['source_tube'] = barcode
 					self.current_transfer.updateStatus(TStatus.started)
 
-					# if its after the first transfer, update the previous transfer as complete
+					# if it's after the first transfer, update the previous transfer as complete
 					if self._current_idx > 0:
 						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
 						previous_transfer.updateStatus(TStatus.completed)
