@@ -194,7 +194,7 @@ class TubeToWell:
 				This issue was found on the row with: {well_number, availability, barcode}")
 				raise TError(self.msg)
 			elif availability == "NOT AVAILABLE":
-				self.controls += well_number
+				self.controls.append(well_number)
 			elif barcode != None:
 				self.barcode_to_well[barcode] = well_number
 		
