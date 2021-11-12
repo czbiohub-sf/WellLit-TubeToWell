@@ -37,6 +37,11 @@ class ChooseSaveDirDialog(FloatLayout):
 	cancel = ObjectProperty(None)
 	save_dir = StringProperty('')
 
+class ChooseTemplateDialog(FloatLayout):
+	choose = ObjectProperty(None)
+	cancel = ObjectProperty(None)
+	template_path = StringProperty('')
+
 class TubeToWellWidget(WellLitWidget):
 	"""
 	Scans barcoded tubes and assigns the contents to wells in sequential order on a well plate of either 96 or 384 wells.
@@ -57,6 +62,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.ids.dest_plate.initialize()
 		self.filename = None
 		self.save_directory = None
+		self.template_file = None
 		self.user = ''
 
 	def _on_keyboard_up(self, keyboard, keycode, text, modifiers):
@@ -95,6 +101,37 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(err, 'Load Failed')
 			except TConfirm as conf:
 				self.showPopup(conf, 'Load Successful')
+
+	def showChooseTemplateFile(self):
+		content = ChooseTemplateDialog(choose=self._chooseTemplateFile, cancel=self.dismiss_popup, template_path=self.load_path)
+		self._popup = Popup(title="Choose template file", content=content)
+		self._popup.size_hint = (0.4, 0.8)
+		self._popup.pos_hint = {'x': 10.0 / Window.width, 'y': 100 / Window.height}
+		self._popup.open()
+
+	def _chooseTemplateFile(self, filename):
+		self.dismiss_popup()
+		self.template_file = filename
+		self.showPopup(TConfirm(
+			'Loading a template file will set which wells are available to be aliquoted into. Additionally any well-to-barcode mappings present in the csv file\
+				will be enforced.'
+			'Are you sure?'),
+			'Confirm template file load',
+			func=self._loadTemplateFile)
+	
+	def _loadTemplateFile(self, _):
+		if self.template_file:
+			filename = self.template_file[0]
+		else:
+			self.showPopup(TError('Invalid target to load'), 'Unable to load file')
+
+		if os.path.isfile(str(filename)):
+			try:
+				self.ttw.loadWellConfigurationCSV(filename)
+			except TError as err:
+				self.showPopup(err, 'Load failed')
+			except TConfirm as conf:
+				self.showPopup(conf, 'Load successful')
 
 	def showChooseSaveDirectory(self):
 		content = ChooseSaveDirDialog(choose=self.chooseDirectory, cancel=self.dismiss_popup, save_dir=self.load_path)
