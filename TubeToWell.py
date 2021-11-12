@@ -40,6 +40,9 @@ class TubeToWell:
 		if not os.path.isdir(self.samples_dir):
 			self.samples_dir = cwd + '/samples/'
 
+		if not os.path.isdir(self.templates_dir):
+			self.samples_dir = cwd + '/templates/'
+
 		self.warningsMade = False
 		self.timestamp = ''
 		self.plate_barcode = ''
