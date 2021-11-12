@@ -87,7 +87,7 @@ class TubeToWell:
 					unique_id  = str(uuid.uuid1())
 					well = self.barcode_to_well[barcode]
 					tf = Transfer(unique_id, dest_plate=self.plate_barcode, dest_well=well)
-					self.transfers[unique_id] = tf
+					self.tp.transfers[unique_id] = tf
 					self.tp.tf_seq.insert(self.tp._current_idx, unique_id)
 
 			if self.sample_list is None:
