@@ -81,6 +81,7 @@ class TubeToWell:
 
 			# First check to see if this is a specifically assigned barcode
 			# (i.e a tube that should go to a specific well)
+			barcode = str(barcode)
 			if barcode in self.barcode_to_well.keys():
 				if self.tp.uniqueBarcode(barcode):
 					unique_id  = str(uuid.uuid1())
@@ -187,6 +188,9 @@ class TubeToWell:
 			raise TError(self.msg)
 
 		# Add the unavailable wells and mark the wells reserved for specific barcodes
+
+		# Note if a templating file is loaded, the default control wells (as specified in the json file) are discarded.
+		self.controls = []
 		for _, row in wells_config_df.iterrows():
 			well_number = row["wells"]
 			availability = row["availability"]
@@ -200,6 +204,7 @@ class TubeToWell:
 			elif availability == "NOT AVAILABLE":
 				self.controls.append(well_number)
 			elif barcode != None:
+				barcode = str(barcode)
 				self.barcode_to_well[barcode] = well_number
 		
 
@@ -315,7 +320,7 @@ class TTWTransferProtocol(TransferProtocol):
 		well_names = self.generateWellList()
 		valid_well_names = []
 		for well_name in well_names:
-			if (well_name not in self.controls) and (well_name not in ttw.barcode_to_well.keys()):
+			if (well_name not in self.controls) and (well_name not in ttw.barcode_to_well.values()):
 				valid_well_names.append(well_name)
 
 		# build transfer protocol:
