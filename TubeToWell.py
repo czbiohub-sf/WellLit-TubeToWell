@@ -198,9 +198,7 @@ class TubeToWell:
 			barcode = row["barcodes"]
 
 			if availability == "NOT AVAILABLE" and not pd.isna(barcode):
-				self.log(f"A well has been specified as 'Not Available' AND a barcode has been assigned to this well. \
-				Only one or the other should be assigned. Please fix this in the sheet and try again.\
-				This issue was found on the row with: {well_number, availability, barcode}")
+				self.log(f"A well has been specified as 'Not Available' AND a barcode has been assigned to this well. Please fix this in the sheet and try again. This issue was found on the row with: \n{well_number, availability, barcode}")
 				raise TError(self.msg)
 			elif availability == "NOT AVAILABLE":
 				self.controls.append(well_number)
