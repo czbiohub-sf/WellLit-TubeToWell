@@ -202,7 +202,7 @@ class TubeToWell:
 				raise TError(self.msg)
 			elif availability == "NOT AVAILABLE":
 				self.controls.append(well_number)
-			elif barcode != None:
+			elif not pd.isna(barcode):
 				barcode = str(barcode)
 				self.barcode_to_well[barcode] = well_number
 		
