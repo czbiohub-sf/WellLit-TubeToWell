@@ -167,29 +167,31 @@ class TubeToWell:
 		wells_config_df["availability"] = wells_config_df["availability"].str.upper()
 
 		# First validate that the user entered wells are valid
-		invalid_wells = ~wells_config_df["wells"].isin(valid_wells)
+		no_nan_wells = wells_config_df[wells_config_df["wells"].notna()]["wells"]
+		invalid_wells = ~no_nan_wells.isin(valid_wells)
 		if any(invalid_wells):
 			list_of_invalid_rows = wells_config_df[invalid_wells]
 			self.log(f"Invalid well(s) encountered in column A: {list_of_invalid_rows}).")
 			raise TError(self.msg)
 
 		# Well names are valid, next check available/not available column for invalid entries
-		invalid_availability = ~wells_config_df["availability"].isin(["AVAILABLE", "NOT AVAILABLE"])
+		no_nan_availability = wells_config_df[wells_config_df["availability"].notna()]["availability"]
+		invalid_availability = ~no_nan_availability.isin(["AVAILABLE", "NOT AVAILABLE"])
 		if any(invalid_availability):
 			list_of_invalid_rows = wells_config_df[invalid_availability]
-			self.log(f"Invalid Available/Not Available entry in column B: {list_of_invalid_rows}")
+			self.log(f"Invalid Available/Not Available entry in column B: \n{list_of_invalid_rows}")
 			raise TError(self.msg)
 
 		# Add the unavailable wells and mark the wells reserved for specific barcodes
 		for _, row in wells_config_df.iterrows():
 			well_number = row["wells"]
 			availability = row["availability"]
-			barcode = row["barcode"]
+			barcode = row["barcodes"]
 
-			if availability == "NOT AVAILABLE" and barcode != None:
+			if availability == "NOT AVAILABLE" and not pd.isna(barcode):
 				self.log(f"A well has been specified as 'Not Available' AND a barcode has been assigned to this well. \
-							Only one or the other should be assigned. Please fix this in the sheet and try again.\
-							This issue was found on the row with: {well_number, availability, barcode}")
+				Only one or the other should be assigned. Please fix this in the sheet and try again.\
+				This issue was found on the row with: {well_number, availability, barcode}")
 				raise TError(self.msg)
 			elif availability == "NOT AVAILABLE":
 				self.controls += well_number
