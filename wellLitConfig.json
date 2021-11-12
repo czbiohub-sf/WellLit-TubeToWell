@@ -1,7 +1,7 @@
 {   "num_wells": "96",
     "records_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Records\\",
     "samples_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Samples\\",
-    "template_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Templates\\",
+    "templates_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Templates\\",
     "controls" : ["A1", "A8", "A9", "A10", "A11", "A12", "H1", "H8", "H9", "H10", "H11", "H12"],
     "384": {
     "A1_X_dest": 0.235,

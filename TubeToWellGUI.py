@@ -58,6 +58,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.error_popup = WellLitPopup()
 		self.confirm_popup = ConfirmPopup()
 		self.load_path = self.ttw.samples_dir
+		self.templates_path = self.ttw.templates_dir
 		self.status = ''
 		self.ids.dest_plate.initialize()
 		self.filename = None
@@ -103,7 +104,7 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(conf, 'Load Successful')
 
 	def showChooseTemplateFile(self):
-		content = ChooseTemplateDialog(choose=self._chooseTemplateFile, cancel=self.dismiss_popup, template_path=self.load_path)
+		content = ChooseTemplateDialog(choose=self._chooseTemplateFile, cancel=self.dismiss_popup, template_path=self.templates_path)
 		self._popup = Popup(title="Choose template file", content=content)
 		self._popup.size_hint = (0.4, 0.8)
 		self._popup.pos_hint = {'x': 10.0 / Window.width, 'y': 100 / Window.height}

@@ -28,6 +28,7 @@ class TubeToWell:
 		self.num_wells = configs['num_wells']
 		self.records_dir = configs['records_dir']
 		self.samples_dir = configs['samples_dir']
+		self.templates_dir = configs['templates_dir']
 		self.controls = configs['controls']
 		self.barcode_to_well = {}
 		self.csv = ''
