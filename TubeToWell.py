@@ -148,7 +148,7 @@ class TubeToWell:
 		"""
 
 		try:
-			wells_config_df = pd.read_csv(filename, header=0, names=["wells", "availability", "barcodes"])
+			wells_config_df = pd.read_csv(filename, header=0, names=["wells", "availability", "barcodes"], dtype=str)
 		except:
 			self.log(f"Failed to load well configuration csv (tried to load {filename}).")
 			raise TError(self.msg)
