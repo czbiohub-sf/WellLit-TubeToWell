@@ -206,6 +206,7 @@ class TubeToWell:
 				barcode = str(barcode)
 				self.barcode_to_well[barcode] = well_number
 		
+		self.tp = TTWTransferProtocol(self, controls=self.controls)
 
 	def setSaveDirectory(self, directory):
 		"""Sets the location to save records """

@@ -131,7 +131,6 @@ class TubeToWellWidget(WellLitWidget):
 			except TError as err:
 				self.showPopup(err, 'Load failed')
 			except TConfirm as conf:
-				self.ttw.reset()
 				self.showPopup(conf, 'Load successful')
 
 	def showChooseSaveDirectory(self):
