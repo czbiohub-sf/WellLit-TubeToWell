@@ -114,7 +114,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.dismiss_popup()
 		self.template_file = filename
 		self.showPopup(TConfirm(
-			'Loading a template file sets the availbility of wells. Any well-to-barcode mappings present in the csv file will be enforced.'
+			'Loading a template file sets the availability of wells. Any well-to-barcode mappings present in the csv file will be enforced.'
 			'Are you sure?'),
 			'Confirm template file load',
 			func=self._loadTemplateFile)

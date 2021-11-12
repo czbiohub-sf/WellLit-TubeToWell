@@ -176,15 +176,15 @@ class TubeToWell:
 		no_nan_wells = wells_config_df[wells_config_df["wells"].notna()]["wells"]
 		invalid_wells = ~no_nan_wells.isin(valid_wells)
 		if any(invalid_wells):
-			list_of_invalid_rows = wells_config_df[invalid_wells]
-			self.log(f"Invalid well(s) encountered in column A: {list_of_invalid_rows}).")
+			list_of_invalid_rows = no_nan_wells[invalid_wells].to_string(index=False, header=False)
+			self.log(f"Invalid well(s) encountered in column A: {list_of_invalid_rows}.")
 			raise TError(self.msg)
 
 		# Well names are valid, next check available/not available column for invalid entries
 		no_nan_availability = wells_config_df[wells_config_df["availability"].notna()]["availability"]
 		invalid_availability = ~no_nan_availability.isin(["AVAILABLE", "NOT AVAILABLE"])
 		if any(invalid_availability):
-			list_of_invalid_rows = wells_config_df[invalid_availability]
+			list_of_invalid_rows = no_nan_availability[invalid_availability].to_string(index=False, header=False)
 			self.log(f"Invalid Available/Not Available entry in column B: \n{list_of_invalid_rows}")
 			raise TError(self.msg)
 
