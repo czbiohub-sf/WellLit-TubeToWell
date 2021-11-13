@@ -92,7 +92,7 @@
 		size_hint_y: 0.3
 		BoxLayout:
 			size_hint_x: None
-    		width: 300
+    		width: 400
 			id: metadata_box
 			orientation: 'vertical'
             Label:
@@ -142,7 +142,7 @@
 	        bold: True
     	BoxLayout:
     		size_hint_x: None
-    		width: 300
+    		width: 400
 		    orientation: 'vertical'
 		    id: button_box
 		    TextInput:
@@ -151,10 +151,10 @@
 		    	size_hint_y: .5
 		    	focus: True
 		    Button:
-		    	text: 'Undo Last Tube'
+		    	text: 'Undo Last Transfer'
 		    	on_press: root.undoTube()
 			Button:
-				text: 'Undo Specific Well'
+				text: 'Discard Specific Well'
 				on_press: root.cancelWellConfirmation()
 			Button:
 				text: "Show Completed Transfers"
