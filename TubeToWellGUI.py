@@ -228,19 +228,23 @@ class TubeToWellWidget(WellLitWidget):
 			self.showPopup(err, "Unable to undo")
 			self.status = self.ttw.msg
 
-	def cancelSpecificWell(self):
+	def cancelWellConfirmation(self):
 		text = self.ids.textbox.text
 		is_well = text in self.ttw.tp.valid_wells
 		if is_well:
 			if self.ttw.tp.isWellUsed(text):
-				self.ttw.tp.cancelSpecificWell(text)
-				self.ttw.writeTransferRecordFiles()
-				self.ids.textbox.text = ''
-				self.showPopup(f"Cancelled well: {text}. The tube associated with {text} ({self.ttw.tp.cancelled_well_barcode}) can be aliquoted into another well.", f"Cancelled well {text}")
+				self.showPopup(f'Are you sure you want to cancel well {text}?', 'Confirm', func=self.cancelSpecificWell)
 			else:
 				self.showPopup("This well hasn't been used yet! Nothing to cancel.", "Invaid well")
 		else:
 			self.showPopup("Invalid well name entered.", "Invalid well")
+			
+	def cancelSpecificWell(self):
+		text = self.ids.textbox.text
+		self.ttw.tp.cancelSpecificWell(text)
+		self.ttw.writeTransferRecordFiles()
+		self.ids.textbox.text = ''
+		self.showPopup(f"Cancelled well: {text}. The tube associated with {text} ({self.ttw.tp.cancelled_well_barcode}) can be aliquoted into another well.", f"Cancelled well {text}")
 
 	def finishPlate(self):
 		# def showPopup(self, error, title: str, func=None):
