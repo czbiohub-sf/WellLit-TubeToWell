@@ -199,6 +199,13 @@ class TubeToWellWidget(WellLitWidget):
 		self._popup.title = title
 		self._popup.show(error.__str__(), func=func)
 
+	def showPopupWithScroll(self, msg, title: str, func=None):
+		self._popup = WellLitPopup()
+		self._popup.size_hint = (0.6, None)
+		self._popup.pos_hint = {'left': 1, 'top':  1}
+		self._popup.title = title
+		self._popup.show(msg.__str__(), func=func)
+
 	def next(self, blank):
 		barcode = self.ids.textbox.text
 		self.ids.tube_barcode.text = barcode
@@ -244,10 +251,20 @@ class TubeToWellWidget(WellLitWidget):
 		self.ttw.tp.cancelSpecificWell(text)
 		self.ttw.writeTransferRecordFiles()
 		self.ids.textbox.text = ''
-		self.showPopup(f"Cancelled well: {text}. The tube associated with {text} ({self.ttw.tp.cancelled_well_barcode}) can be aliquoted into another well.", f"Cancelled well {text}")
+		self.showPopup(f"Cancelled well: {text}. The tube associated with {text} (w/ barcode: {self.ttw.tp.cancelled_well_barcode}) can be aliquoted into another well.", f"Cancelled well {text}")
 
+	def showAllTransfers(self):
+		"""Display the currently completed transfers to the user."""
+		output = ""
+		keys = ['source_tube', 'dest_well', 'status']
+		for transfer_id in self.tp.tf_seq:
+			transfer = self.tp.transfers[transfer_id]
+			if transfer['status'] is not 'uncompleted':
+				output += ' '.join(map(str, [transfer[key] for key in keys]))
+				output += "\n"
+		self.showPopupWithScroll(output, "Current Transfers")
+		
 	def finishPlate(self):
-		# def showPopup(self, error, title: str, func=None):
 		self.showPopup('Are you sure you want to finish the plate?', 'Confirm plate finish', self.resetAll)
 
 	def resetAll(self, button):
