@@ -6,6 +6,9 @@ import kivy, os
 kivy.require('1.11.1')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
 from kivy.properties import StringProperty
@@ -200,11 +203,12 @@ class TubeToWellWidget(WellLitWidget):
 		self._popup.show(error.__str__(), func=func)
 
 	def showPopupWithScroll(self, msg, title: str, func=None):
-		self._popup = WellLitPopup()
-		self._popup.size_hint = (0.6, None)
-		self._popup.pos_hint = {'left': 1, 'top':  1}
-		self._popup.title = title
-		self._popup.show(msg.__str__(), func=func)
+		scroll = ScrollView(size_hint=(0.6, 0.4))
+		grid = GridLayout(cols=1, size_hint=(1, None))
+		scroll.add_widget(grid)
+		grid.bind(minimum_height=grid.setter('height'))
+		grid.add_widget(Label(text=msg))
+		
 
 	def next(self, blank):
 		barcode = self.ids.textbox.text
