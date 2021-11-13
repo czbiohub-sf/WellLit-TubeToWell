@@ -235,6 +235,8 @@ class TubeToWellWidget(WellLitWidget):
 			if self.ttw.tp.isWellUsed(text):
 				self.ttw.tp.cancelSpecificWell(text)
 				self.ttw.writeTransferRecordFiles()
+				self.ids.textbox.text = ''
+				self.showPopup(f"Cancelled well: {text}. The tube associated with {text} can be aliquoted into another well.", f"Cancelled well {text}")
 			else:
 				self.showPopup("This well hasn't been used yet! Nothing to cancel.", "Invaid well")
 		else:
