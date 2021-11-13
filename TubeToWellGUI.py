@@ -238,8 +238,8 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup("This well hasn't been used yet! Nothing to cancel.", "Invaid well")
 		else:
 			self.showPopup("Invalid well name entered.", "Invalid well")
-			
-	def cancelSpecificWell(self):
+
+	def cancelSpecificWell(self, _):
 		text = self.ids.textbox.text
 		self.ttw.tp.cancelSpecificWell(text)
 		self.ttw.writeTransferRecordFiles()
