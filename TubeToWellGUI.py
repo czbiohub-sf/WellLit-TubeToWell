@@ -247,6 +247,9 @@ class TubeToWellWidget(WellLitWidget):
 		self.showPopup('Are you sure you want to finish the plate?', 'Confirm plate finish', self.resetAll)
 
 	def resetAll(self, button):
+		# Flush the data
+		self.ttw.writeTransferRecordFiles()
+		
 		# restart metadata collection
 		self.ids.textbox.funbind('on_text_validate', self.next)
 		self.ids.textbox.funbind('on_text_validate', self.scanPlate)
