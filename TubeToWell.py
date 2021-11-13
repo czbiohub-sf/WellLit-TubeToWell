@@ -402,7 +402,8 @@ class TTWTransferProtocol(TransferProtocol):
 			transfer = self.transfers[unique_id]
 			well = transfer["dest_well"]
 			if well == well_name:
-				return True
+				if transfer.status is TStatus.completed:
+					return True
 
 		return False
 
@@ -419,6 +420,7 @@ class TTWTransferProtocol(TransferProtocol):
 			well = transfer["dest_well"]
 			if well == well_name:
 				transfer["source_tube"] = "CANCELLED"
+				transfer.status = TStatus.failed
 
 	def plateComplete(self):
 		"""
