@@ -257,8 +257,8 @@ class TubeToWellWidget(WellLitWidget):
 		"""Display the currently completed transfers to the user."""
 		output = ""
 		keys = ['source_tube', 'dest_well', 'status']
-		for transfer_id in self.tp.tf_seq:
-			transfer = self.tp.transfers[transfer_id]
+		for transfer_id in self.ttw.tp.tf_seq:
+			transfer = self.ttw.tp.transfers[transfer_id]
 			if transfer['status'] is not 'uncompleted':
 				output += ' '.join(map(str, [transfer[key] for key in keys]))
 				output += "\n"
