@@ -129,9 +129,9 @@ class TubeToWellWidget(WellLitWidget):
 			try:
 				self.ttw.loadWellConfigurationCSV(filename)
 			except TError as err:
-				self.showPopup(err, 'Load failed')
+				self.showPopup(err, 'Load Failed')
 			except TConfirm as conf:
-				self.showPopup(conf, 'Load successful')
+				self.showPopup(conf, 'Load Successful')
 
 	def showChooseSaveDirectory(self):
 		content = ChooseSaveDirDialog(choose=self.chooseDirectory, cancel=self.dismiss_popup, save_dir=self.load_path)
@@ -236,7 +236,7 @@ class TubeToWellWidget(WellLitWidget):
 				self.ttw.tp.cancelSpecificWell(text)
 				self.ttw.writeTransferRecordFiles()
 				self.ids.textbox.text = ''
-				self.showPopup(f"Cancelled well: {text}. The tube associated with {text} can be aliquoted into another well.", f"Cancelled well {text}")
+				self.showPopup(f"Cancelled well: {text}. The tube associated with {text} ({self.ttw.tp.cancelled_well_barcode}) can be aliquoted into another well.", f"Cancelled well {text}")
 			else:
 				self.showPopup("This well hasn't been used yet! Nothing to cancel.", "Invaid well")
 		else:
@@ -249,7 +249,7 @@ class TubeToWellWidget(WellLitWidget):
 	def resetAll(self, button):
 		# Flush the data
 		self.ttw.writeTransferRecordFiles()
-		
+
 		# restart metadata collection
 		self.ids.textbox.funbind('on_text_validate', self.next)
 		self.ids.textbox.funbind('on_text_validate', self.scanPlate)
