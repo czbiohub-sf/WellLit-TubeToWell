@@ -322,6 +322,7 @@ class TTWTransferProtocol(TransferProtocol):
 		for well_name in well_names:
 			if (well_name not in self.controls) and (well_name not in ttw.barcode_to_well.values()):
 				valid_well_names.append(well_name)
+		self.valid_wells = valid_well_names
 
 		# build transfer protocol:
 		self.tf_seq = []
@@ -329,7 +330,6 @@ class TTWTransferProtocol(TransferProtocol):
 		current_idx = 0
 		for well in valid_well_names:
 			unique_id = str(uuid.uuid1())
-			# TODO set well here (check dictionary for barcode -> well mapping, otherwise just use the next well)
 			tf = Transfer(unique_id, dest_plate=ttw.plate_barcode, dest_well=well)
 			self.transfers[unique_id] = tf
 			self.tf_seq.append(unique_id)
@@ -394,6 +394,31 @@ class TTWTransferProtocol(TransferProtocol):
 		else:
 			self.log('Cannot undo previous operation')
 			raise TError('Cannot undo previous operation')
+
+	def isWellUsed(self, well_name: str):
+		"""Checks to see if a well has already been used."""
+
+		for unique_id in self.tf_seq:
+			transfer = self.transfers[unique_id]
+			well = transfer["dest_well"]
+			if well == well_name:
+				return True
+
+		return False
+
+	def cancelSpecificWell(self, well_name: str):
+		"""Cancel a specific well.
+		
+		If the user makes a mistake and aliquots into the wrong well, then we want to allow them the ability to "cancel" that well
+		and free up the test tube barcode so that it may be aliquoted into another well. 
+		The "cancelled" well will be marked as having a source_tube named "CANCELLED".
+		"""
+
+		for unique_id in self.tf_seq:
+			transfer = self.transfers[unique_id]
+			well = transfer["dest_well"]
+			if well == well_name:
+				transfer["source_tube"] = "CANCELLED"
 
 	def plateComplete(self):
 		"""

@@ -153,6 +153,9 @@
 		    Button:
 		    	text: 'Undo Last Tube'
 		    	on_press: root.undoTube()
+			Button:
+				text: 'Undo specific well'
+				on:press root.cancelSpecificWell()
 		    Button:
 		    	text: 'Finish Plate'
 		    	on_press: root.finishPlate()

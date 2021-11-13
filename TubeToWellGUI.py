@@ -220,13 +220,25 @@ class TubeToWellWidget(WellLitWidget):
 		try:
 			self.ttw.undo()
 			self.updateLights()
-			self.showPopup('Previous tube un-scanned', "Action undone")
+			self.showPopup("Previous tube un-scanned", "Action undone")
 			self.status = self.ttw.msg
 		except TError as err:
 			self.ttw.writeTransferRecordFiles()
 			self.updateLights()
 			self.showPopup(err, "Unable to undo")
 			self.status = self.ttw.msg
+
+	def cancelSpecificWell(self):
+		text = self.ids.textbox.text
+		is_well = text in self.ttw.tp.valid_wells
+		if is_well:
+			if self.ttw.tp.isWellUsed(text):
+				self.ttw.tp.cancelSpecificWell(text)
+				self.ttw.writeTransferRecordFiles()
+			else:
+				self.showPopup("This well hasn't been used yet! Nothing to cancel.", "Invaid well")
+		else:
+			self.showPopup("Invalid well name entered.", "Invalid well")
 
 	def finishPlate(self):
 		# def showPopup(self, error, title: str, func=None):
