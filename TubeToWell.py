@@ -390,8 +390,8 @@ class TTWTransferProtocol(TransferProtocol):
 		self.sortTransfers()
 		if self._current_idx > 0:
 			if self.canUndo:
-				self.current_transfer.resetTransfer()
 				self.current_idx_decrement()
+				self.current_transfer.resetTransfer()
 				self.canUndo = False
 				self.sortTransfers()
 				self.log("Current scan has been cancelled. A new tube can be scanned for aliquoting into this well.")
