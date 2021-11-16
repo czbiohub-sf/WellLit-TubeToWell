@@ -257,7 +257,7 @@ class TubeToWell:
 		record_path_filename = Path(self.records_dir + self.csv + '.csv')
 		paths_to_write = [record_path_filename]
 		if self.custom_records_dir != None:
-			paths_to_write.append(self.custom_records_dir)
+			paths_to_write.append(Path(self.custom_records_dir + self.csv + ".csv"))
 		for path in paths_to_write:
 			# use the first 5 rows of the output file for metadata
 			self.metadata = [['%Plate Timestamp: ', self.timestamp],
