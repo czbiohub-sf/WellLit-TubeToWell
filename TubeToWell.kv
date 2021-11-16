@@ -81,7 +81,7 @@
                 text: 'Cancel'
                 on_release: root.cancel()
             Button:
-                text: 'Choose template'
+                text: 'Load template'
                 on_release: root.choose(filechooser.selection)
 
 <TubeToWellWidget>:
@@ -132,7 +132,7 @@
 				on_press: root.showChooseSaveDirectory()
 
 			Button:
-				text: 'Choose Template File'
+				text: 'Load Template File'
 				on_press: root.showChooseTemplateFile()
 
 	    Label:
