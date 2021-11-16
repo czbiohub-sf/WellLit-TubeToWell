@@ -213,18 +213,19 @@ class TubeToWellWidget(WellLitWidget):
 		label.bind(texture_size=label.setter('size'))
 		grid.add_widget(label)
 		self._popup = Popup(title=title, content=scroll)
-		self._popup.size_hint = (0.3, 0.3)
-		self._popup.pos_hint = {"x": 0.4, "y": 850 / Window.height}
+		self._popup.size_hint = (0.5, 0.3)
+		self._popup.pos_hint = {"x": 0.25, "y": 850 / Window.height}
 		self._popup.open()
 		
 	def discardWellPopup(self):
 		def none(*args):
 			pass
-		self.ids.textbox.bind(focus=none)
-		self.ids.textbox.bind(on_text_validate=none)
+		# self.ids.textbox.bind(focus=none)
+		# self.ids.textbox.bind(on_text_validate=none)
+		# self.ids.textbox.focus = False
 		# self.ids.textbox.disabled = True
 		grid = GridLayout(cols=1, size_hint=(1, None))
-		self.discard_well_input = TextInput(focus=True)
+		self.discard_well_input = TextInput(text="Enter the well number to discard (e.g A2)", focus=True)
 		self.discard_well_input.bind(on_text_validate=self.discardWellConfirmation)
 		grid.add_widget(self.discard_well_input)
 		self._popup = Popup(title="Discard a well", content=grid)
@@ -283,12 +284,18 @@ class TubeToWellWidget(WellLitWidget):
 
 	def showAllTransfers(self):
 		"""Display the currently completed transfers to the user."""
+		barcode_dashes = 30
+		tube_dashes = 4
 		output = "Barcode, Tube, Status\n"
 		keys = ['source_tube', 'dest_well', 'status']
 		for transfer_id in self.ttw.tp.tf_seq:
 			transfer = self.ttw.tp.transfers[transfer_id]
 			if transfer['status'] is not 'uncompleted':
-				output += ', '.join(map(str, [transfer[key] for key in keys]))
+				barcode = transfer["source_tube"] + "-"*(barcode_dashes - len(barcode))
+				dest_well = transfer["dest_well"] + "-"*(tube_dashes - len(dest_well))
+				status = transfer["status"]
+				line = barcode + dest_well + status
+				output += line 
 				output += "\n"
 		self.showPopupWithScroll(output, "Current Transfers")
 		
