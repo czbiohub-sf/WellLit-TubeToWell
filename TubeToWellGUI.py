@@ -239,6 +239,11 @@ class TubeToWellWidget(WellLitWidget):
 		barcode = self.ids.textbox.text
 		self.ids.tube_barcode.text = barcode
 		self.ids.textbox.text = ''
+
+		# Ensure a blank barcode can't be used
+		if barcode == "":
+			return
+			
 		try:
 			self.ttw.next(barcode)
 			self.updateLights()
@@ -286,7 +291,7 @@ class TubeToWellWidget(WellLitWidget):
 		"""Display the currently completed transfers to the user."""
 
 		output = "{:<30}{:^10}{:>15}".format("Barcode", "Tube", "Status")
-		output += "Status\n"
+		output += "\n"
 		for transfer_id in self.ttw.tp.tf_seq:
 			transfer = self.ttw.tp.transfers[transfer_id]
 			if transfer['status'] is not 'uncompleted':
