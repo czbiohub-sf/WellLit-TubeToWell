@@ -424,6 +424,7 @@ class TTWTransferProtocol(TransferProtocol):
 			if well == well_name:
 				self.discarded_well_barcode = transfer['source_tube']
 				transfer.updateStatus(TStatus.failed)
+		self.sortTransfers()
 
 	def plateComplete(self):
 		"""
