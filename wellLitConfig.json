@@ -2,7 +2,7 @@
     "records_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Records\\",
     "samples_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Samples\\",
     "templates_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Templates\\",
-    "controls" : ["A1", "A8", "A9", "A10", "A11", "A12", "H1", "H8", "H9", "H10", "H11", "H12"],
+    "controls" : [],
     "384": {
     "A1_X_dest": 0.235,
     "A1_Y_dest": 0.135,
