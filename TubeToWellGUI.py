@@ -290,6 +290,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.ttw.writeTransferRecordFiles()
 		self.ids.textbox.text = ''
 		self.showPopup(f"Discarded well: {text}. The tube associated with {text} (w/ barcode: {self.ttw.tp.discarded_well_barcode}) can be aliquoted into another well.", f"Discarded well {text}")
+		self.updateLights()
 
 	def showAllTransfers(self):
 		"""Display the currently completed transfers to the user."""
