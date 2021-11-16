@@ -9,6 +9,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
 from kivy.properties import StringProperty
@@ -215,6 +216,9 @@ class TubeToWellWidget(WellLitWidget):
 		self._popup.pos_hint = {"x": 0.4, "y": 850 / Window.height}
 		self._popup.open()
 		
+	def discardWellPopup(self, title: str):
+		
+		pass
 
 	def next(self, blank):
 		barcode = self.ids.textbox.text

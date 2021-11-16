@@ -27,6 +27,7 @@ class TubeToWell:
 
 		self.num_wells = configs['num_wells']
 		self.records_dir = configs['records_dir']
+		self.custom_records_dir = None
 		self.samples_dir = configs['samples_dir']
 		self.templates_dir = configs['templates_dir']
 		self.controls = configs['controls']
@@ -210,7 +211,7 @@ class TubeToWell:
 
 	def setSaveDirectory(self, directory):
 		"""Sets the location to save records """
-		self.records_dir = directory
+		self.custom_records_dir = directory
 
 	def writeWarning(self):
 		""""
@@ -254,24 +255,27 @@ class TubeToWell:
 		Writes metadata from current transfer sequence to a csv file
 		"""
 		record_path_filename = Path(self.records_dir + self.csv + '.csv')
-
-		# use the first 5 rows of the output file for metadata
-		self.metadata = [['%Plate Timestamp: ', self.timestamp],
-						 ['%Username: ', self.user],
-						 ['%Plate Barcode: ', self.plate_barcode],
-						 ['%Timestamp', 'Tube Barcode', 'Location']]
-		try:
-			with open(record_path_filename, 'w', newline='') as logfile:
-				log_writer = csv.writer(logfile)
-				log_writer.writerows(self.metadata)
-				keys = ['timestamp', 'source_tube', 'dest_well']
-				for transfer_id in self.tp.tf_seq:
-					transfer = self.tp.transfers[transfer_id]
-					if transfer['status'] is not 'uncompleted':
-						log_writer.writerow([transfer[key] for key in keys])
-				self.log('Wrote transfer record to ' + str(record_path_filename))
-		except:
-			raise TError('Cannot write record file to ' + str(record_path_filename))
+		paths_to_write = [record_path_filename]
+		if self.custom_records_dir != None:
+			paths_to_write.append(self.custom_records_dir)
+		for path in paths_to_write:
+			# use the first 5 rows of the output file for metadata
+			self.metadata = [['%Plate Timestamp: ', self.timestamp],
+							['%Username: ', self.user],
+							['%Plate Barcode: ', self.plate_barcode],
+							['%Timestamp', 'Tube Barcode', 'Location']]
+			try:
+				with open(path, 'w', newline='') as logfile:
+					log_writer = csv.writer(logfile)
+					log_writer.writerows(self.metadata)
+					keys = ['timestamp', 'source_tube', 'dest_well']
+					for transfer_id in self.tp.tf_seq:
+						transfer = self.tp.transfers[transfer_id]
+						if transfer['status'] is not 'uncompleted':
+							log_writer.writerow([transfer[key] for key in keys])
+					self.log('Wrote transfer record to ' + str(record_path_filename))
+			except:
+				raise TError('Cannot write record file to ' + str(path))
 
 	def isPlate(self, check_input):
 		return True
