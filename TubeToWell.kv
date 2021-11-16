@@ -22,7 +22,7 @@
 	markup: True
 	font_size: 20
 <Button>
-	font_size: 30
+	font_size: 25
 
 <LoadDialog>:
     BoxLayout:
@@ -140,31 +140,46 @@
 	        text: "Please scan or key in plate barcode"
 	        font_size: 50
 	        bold: True
-    	BoxLayout:
+    	GridLayout:
     		size_hint_x: None
     		width: 400
-		    orientation: 'vertical'
+		    cols: 2
 		    id: button_box
 		    TextInput:
 		    	id: textbox
 		    	multiline: False
 		    	size_hint_y: .5
 		    	focus: True
-		    Button:
-		    	text: 'Undo Last Transfer'
-		    	on_press: root.undoTube()
+			Button:
+				text: 'Cancel Current Scan'
+				on_press: root.undoCurrentScan()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
 			Button:
 				text: 'Discard Well'
 				on_press: root.discardWellConfirmation()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
 			Button:
 				text: "Show Completed Transfers"
 				on_press: root.showAllTransfers()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
 		    Button:
 		    	text: 'Finish Plate'
 		    	on_press: root.finishPlate()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
 		    Button:
 		        text: 'Quit'
 		        on_press: root.quit_button()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
     WellPlot:
         id: dest_plate
         shape: 'circle'

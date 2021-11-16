@@ -260,6 +260,24 @@ class TubeToWellWidget(WellLitWidget):
 			self.showPopup(conf, "Plate complete")
 			self.status = self.ttw.msg
 			self.updateLights()
+	
+	def undoCurrentScan(self):
+		"""Cancel the current scan.
+		
+		If the user accidentally scans an incorrect tube, this allows them to 
+		cancel the current scan, and scan a new (correct) tube to aliquot into the well.
+		"""
+		try:
+			self.ttw.undoCurrentScan()
+			self.updateLights()
+			self.showPopup("Current scan cancelled. A new tube can be scanned for aliquoting into this well.", "Current scan cancelled")
+			self.status = self.ttw.msg
+			self.ids.tube_barcode.text = ''
+		except TError as err:
+			self.ttw.writeTransferRecordFiles()
+			self.updateLights()
+			self.showPopup(err, "Unable to cancel current scan")
+			self.status = self.ttw.msg
 
 	def undoTube(self):
 		try:

@@ -109,6 +109,15 @@ class TubeToWell:
 			self.tp.failed()
 			self.writeTransferRecordFiles()
 
+	def undoCurrentScan(self):
+		if not self.warningsMade:
+			self.makeWarningFile()
+			self.warningsMade = True
+		self.writeWarning()
+		if self.tp_present():
+			self.tp.undoCurrentScan()
+			self.writeTransferRecordFiles()
+
 	def undo(self):
 		if not self.warningsMade:
 			self.makeWarningFile()
@@ -375,6 +384,21 @@ class TTWTransferProtocol(TransferProtocol):
 		else:
 			self.current_idx_increment()
 
+	def undoCurrentScan(self):
+		"""Cancel the current scan."""
+		self.synchronize()
+		self.sortTransfers()
+		if self._current_idx > 0:
+			if self.canUndo:
+				self.current_transfer.resetTransfer()
+				self.current_idx_decrement()
+				self.canUndo = False
+				self.sortTransfers()
+				self.log("Current scan has been cancelled. A new tube can be scanned for aliquoting into this well.")
+		else:
+			self.log("No scan to undo.")
+			raise TError("No scan to undo.")
+
 	def undo(self):
 		"""
 		Overwrites default undo action to step back twice, overwrite the completed transfer and mark as started,
@@ -483,7 +507,7 @@ class TTWTransferProtocol(TransferProtocol):
 
 	def complete(self, barcode):
 		"""
-		Assignes a tube barcode to a specified transfer according to the transfer sequence
+		Assigns a tube barcode to a specified transfer according to the transfer sequence
 		raises TError if the barcode is improperly formatted or already scanned
 		raises TConfirm if the plate is already complete
 		"""
