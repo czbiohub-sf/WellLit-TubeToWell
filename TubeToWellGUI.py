@@ -217,12 +217,17 @@ class TubeToWellWidget(WellLitWidget):
 		self._popup.pos_hint = {"x": 0.4, "y": 850 / Window.height}
 		self._popup.open()
 		
-	def discardWellPopup(self, title: str):
+	def discardWellPopup(self):
+		def none(*args):
+			pass
+		self.ids.textbox.bind(focus=none)
+		self.ids.textbox.bind(on_text_validate=none)
+		# self.ids.textbox.disabled = True
 		grid = GridLayout(cols=1, size_hint=(1, None))
-		self.discard_well_input = TextInput("Enter well to discard", multiline=False)
+		self.discard_well_input = TextInput(focus=True)
 		self.discard_well_input.bind(on_text_validate=self.discardWellConfirmation)
 		grid.add_widget(self.discard_well_input)
-		self._popup = Popup(title=title, content=grid)
+		self._popup = Popup(title="Discard a well", content=grid)
 		self._popup.size_hint = (0.3, 0.3)
 		self._popup.pos_hint = {"x": 0.4, "y": 850 / Window.height}
 		self._popup.open()
@@ -259,7 +264,7 @@ class TubeToWellWidget(WellLitWidget):
 			self.status = self.ttw.msg
 
 	def discardWellConfirmation(self):
-		text = self.discard_well_input.text
+		text = self.ids.textbox.text
 		is_well = text in self.ttw.tp.valid_wells
 		if is_well:
 			if self.ttw.tp.isWellUsed(text):
