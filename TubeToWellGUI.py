@@ -75,6 +75,7 @@ class TubeToWellWidget(WellLitWidget):
 			self.showPopup('Are you sure you want to exit?', 'Confirm exit', func=self.quit)
 
 	def quit_button(self):
+		self.ttw.writeTransferRecordFiles()
 		self.showPopup('Are you sure you want to exit?', 'Confirm exit', func=self.quit)
 
 	def show_load(self):
@@ -217,7 +218,7 @@ class TubeToWellWidget(WellLitWidget):
 		self._popup.open()
 		
 	def discardWellPopup(self, title: str):
-		
+
 		pass
 
 	def next(self, blank):
