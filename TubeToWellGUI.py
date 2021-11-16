@@ -203,11 +203,17 @@ class TubeToWellWidget(WellLitWidget):
 		self._popup.show(error.__str__(), func=func)
 
 	def showPopupWithScroll(self, msg, title: str, func=None):
-		scroll = ScrollView(size_hint=(0.6, 0.4))
+		scroll = ScrollView()
 		grid = GridLayout(cols=1, size_hint=(1, None))
 		scroll.add_widget(grid)
 		grid.bind(minimum_height=grid.setter('height'))
-		grid.add_widget(Label(text=msg))
+		label = Label(text=msg, font_size=24, size_hint=(None, None))
+		label.bind(texture_size=label.setter('size'))
+		grid.add_widget(label)
+		self._popup = Popup(title=title, content=scroll)
+		self._popup.size_hint = (0.3, 0.3)
+		self._popup.pos_hint = {"x": 0.4, "y": 850 / Window.height}
+		self._popup.open()
 		
 
 	def next(self, blank):
@@ -239,32 +245,32 @@ class TubeToWellWidget(WellLitWidget):
 			self.showPopup(err, "Unable to undo")
 			self.status = self.ttw.msg
 
-	def cancelWellConfirmation(self):
+	def discardWellConfirmation(self):
 		text = self.ids.textbox.text
 		is_well = text in self.ttw.tp.valid_wells
 		if is_well:
 			if self.ttw.tp.isWellUsed(text):
-				self.showPopup(f'Are you sure you want to cancel well {text}?', 'Confirm', func=self.cancelSpecificWell)
+				self.showPopup(f'Are you sure you want to discard well {text}?', 'Confirm', func=self.discardSpecificWell)
 			else:
-				self.showPopup("This well hasn't been used yet! Nothing to cancel.", "Invaid well")
+				self.showPopup("This well hasn't been used yet! Nothing to discard.", "Invaid well")
 		else:
 			self.showPopup("Invalid well name entered.", "Invalid well")
 
-	def cancelSpecificWell(self, _):
+	def discardSpecificWell(self, _):
 		text = self.ids.textbox.text
-		self.ttw.tp.cancelSpecificWell(text)
+		self.ttw.tp.discardSpecificWell(text)
 		self.ttw.writeTransferRecordFiles()
 		self.ids.textbox.text = ''
-		self.showPopup(f"Cancelled well: {text}. The tube associated with {text} (w/ barcode: {self.ttw.tp.cancelled_well_barcode}) can be aliquoted into another well.", f"Cancelled well {text}")
+		self.showPopup(f"Discarded well: {text}. The tube associated with {text} (w/ barcode: {self.ttw.tp.cancelled_well_barcode}) can be aliquoted into another well.", f"Discarded well {text}")
 
 	def showAllTransfers(self):
 		"""Display the currently completed transfers to the user."""
-		output = ""
+		output = "Barcode, Tube, Status\n"
 		keys = ['source_tube', 'dest_well', 'status']
 		for transfer_id in self.ttw.tp.tf_seq:
 			transfer = self.ttw.tp.transfers[transfer_id]
 			if transfer['status'] is not 'uncompleted':
-				output += ' '.join(map(str, [transfer[key] for key in keys]))
+				output += ', '.join(map(str, [transfer[key] for key in keys]))
 				output += "\n"
 		self.showPopupWithScroll(output, "Current Transfers")
 		
