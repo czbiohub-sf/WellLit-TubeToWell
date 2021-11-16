@@ -407,12 +407,11 @@ class TTWTransferProtocol(TransferProtocol):
 
 		return False
 
-	def cancelSpecificWell(self, well_name: str):
-		"""Cancel a specific well.
+	def discardSpecificWell(self, well_name: str):
+		"""Discard a specific well.
 		
-		If the user makes a mistake and aliquots into the wrong well, then we want to allow them the ability to "cancel" that well
-		and free up the test tube barcode so that it may be aliquoted into another well. 
-		The "cancelled" well will be marked as having a source_tube named "CANCELLED".
+		If the user makes a mistake and aliquots into the wrong well, then we want to allow them the ability to "discard" that well
+		and free up the test tube barcode so that it may be aliquoted into another well.
 		"""
 
 		for unique_id in self.tf_seq:
