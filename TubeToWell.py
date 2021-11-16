@@ -420,8 +420,9 @@ class TTWTransferProtocol(TransferProtocol):
 
 		for unique_id in self.tf_seq:
 			transfer = self.transfers[unique_id]
-			well = transfer["dest_well"]
+			well = transfer['dest_well']
 			if well == well_name:
+				self.discarded_well_barcode = transfer['source_tube']
 				transfer.updateStatus(TStatus.failed)
 
 	def plateComplete(self):
