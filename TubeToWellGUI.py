@@ -187,6 +187,10 @@ class TubeToWellWidget(WellLitWidget):
 				for tf_id in self.ttw.tp.lists['started']:
 					self.ids.dest_plate.pl.markTarget(self.ttw.tp.transfers[tf_id]['dest_well'])
 
+				# mark failed wells as discarded
+				for tf_id in self.ttw.tp.lists["failed"]:
+					self.ids.dest_plate.pl.markDiscarded(self.ttw.tp.transfers[tf_id]['dest_well'])
+
 				# mark the control wells
 				for control_well in self.ttw.controls:
 					self.ids.dest_plate.pl.markControl(control_well)
@@ -243,7 +247,7 @@ class TubeToWellWidget(WellLitWidget):
 		# Ensure a blank barcode can't be used
 		if barcode == "":
 			return
-			
+
 		try:
 			self.ttw.next(barcode)
 			self.updateLights()
