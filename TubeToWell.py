@@ -509,7 +509,7 @@ class TTWTransferProtocol(TransferProtocol):
 	def uniqueBarcode(self, barcode):
 		for tf_id in self.tf_seq:
 			tf = self.transfers[tf_id]
-			if barcode == tf['source_tube']:
+			if barcode == tf['source_tube'] and tf['status'] != TStatus.failed:
 				return False
 		return True
 
