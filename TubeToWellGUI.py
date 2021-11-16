@@ -286,7 +286,9 @@ class TubeToWellWidget(WellLitWidget):
 		"""Display the currently completed transfers to the user."""
 		barcode_dashes = 30
 		tube_dashes = 4
-		output = "Barcode, Tube, Status\n"
+		output = "Barcode" + "-"*(barcode_dashes - len("Barcode"))
+		output += "Tube" + "-"*(tube_dashes - len("Tube"))
+		output += "Status\n"
 		keys = ['source_tube', 'dest_well', 'status']
 		for transfer_id in self.ttw.tp.tf_seq:
 			transfer = self.ttw.tp.transfers[transfer_id]
