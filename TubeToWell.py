@@ -115,7 +115,12 @@ class TubeToWell:
 			self.warningsMade = True
 		self.writeWarning()
 		if self.tp_present():
-			self.tp.undoCurrentScan()
+			if self.tp._current_idx > 0:
+				prev_transfer = self.tp.transfers[self.tp.tf_seq[self.tp._current_idx - 1]]
+				if prev_transfer['source_tube'] in self.barcode_to_well.keys():
+					self.tp.undoCurrentScan(reserved=True)
+				else:
+					self.tp.undoCurrentScan()
 			self.writeTransferRecordFiles()
 
 	def undo(self):
@@ -384,14 +389,18 @@ class TTWTransferProtocol(TransferProtocol):
 		else:
 			self.current_idx_increment()
 
-	def undoCurrentScan(self):
+	def undoCurrentScan(self, reserved: bool=False):
 		"""Cancel the current scan."""
 		self.synchronize()
 		self.sortTransfers()
 		if self._current_idx > 0:
 			if self.canUndo:
 				self.current_idx_decrement()
-				self.current_transfer.resetTransfer()
+				if reserved:
+					self.current_transfer.resetTransfer()
+					self.tf_seq.pop(self._current_idx)
+				else:
+					self.current_transfer.resetTransfer()
 				self.canUndo = False
 				self.sortTransfers()
 				self.log("Current scan has been cancelled. A new tube can be scanned for aliquoting into this well.")
