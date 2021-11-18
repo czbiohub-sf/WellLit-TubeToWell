@@ -220,24 +220,6 @@ class TubeToWellWidget(WellLitWidget):
 		self._popup.size_hint = (0.5, 0.3)
 		self._popup.pos_hint = {"x": 0.25, "y": 850 / Window.height}
 		self._popup.open()
-		
-	def discardWellPopup(self):
-		def none(*args):
-			pass
-		# self.ids.textbox.bind(focus=none)
-		# self.ids.textbox.bind(on_text_validate=none)
-		# self.ids.textbox.focus = False
-		# self.ids.textbox.disabled = True
-		grid = GridLayout(cols=1, size_hint=(1, None))
-		self.discard_well_input = TextInput(text="Enter the well number to discard (e.g A2)", focus=True)
-		self.discard_well_input.bind(on_text_validate=self.discardWellConfirmation)
-		grid.add_widget(self.discard_well_input)
-		self._popup = Popup(title="Discard a well", content=grid)
-		self._popup.size_hint = (0.3, 0.3)
-		self._popup.pos_hint = {"x": 0.4, "y": 850 / Window.height}
-		self._popup.open()
-		
-		pass
 
 	def next(self, blank):
 		barcode = self.ids.textbox.text
@@ -290,6 +272,16 @@ class TubeToWellWidget(WellLitWidget):
 			self.updateLights()
 			self.showPopup(err, "Unable to undo")
 			self.status = self.ttw.msg
+
+	def discardLastWell(self):
+		if self.ttw.tp._current_idx > 1:
+			prev_id = self.ttw.tp.tf_seq[self.ttw.tp._current_idx - 2]
+			prev_transfer = self.ttw.tp.transfers[prev_id]
+			dest_well = prev_transfer['dest_well']
+			self.ids.textbox.text = dest_well
+			self.discardWellConfirmation()
+		else:
+			self.showPopup("No previous well to discard", "Invalid well")
 
 	def discardWellConfirmation(self):
 		text = self.ids.textbox.text

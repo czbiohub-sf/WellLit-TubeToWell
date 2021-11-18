@@ -108,6 +108,13 @@ class TubeToWell:
 		if self.tp_present():
 			self.tp.failed()
 			self.writeTransferRecordFiles()
+	
+	def getPreviousTransfer(self):
+		if self.tp._current_idx > 0:
+			prev_transfer_id = self.tp.tf_seq[self.tp._current_idx - 1]
+			prev_transfer = self.tp.transfers[prev_transfer_id]
+
+		return prev_transfer
 
 	def undoCurrentScan(self):
 		if not self.warningsMade:
@@ -116,7 +123,7 @@ class TubeToWell:
 		self.writeWarning()
 		if self.tp_present():
 			if self.tp._current_idx > 0:
-				prev_transfer = self.tp.transfers[self.tp.tf_seq[self.tp._current_idx - 1]]
+				prev_transfer = self.getPreviousTransfer()
 				if prev_transfer['source_tube'] in self.barcode_to_well.keys():
 					self.tp.undoCurrentScan(reserved=True)
 				else:

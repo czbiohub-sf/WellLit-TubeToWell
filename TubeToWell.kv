@@ -157,7 +157,13 @@
 				halign: 'center'
 				valign: 'middle'
 			Button:
-				text: 'Discard Well'
+				text: 'Discard Last Well'
+				on_press: root.discardLastWell()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
+			Button:
+				text: 'Discard Specified Well'
 				on_press: root.discardWellConfirmation()
 				text_size: self.size
 				halign: 'center'
