@@ -203,7 +203,7 @@ class TubeToWell:
 			raise TError(self.msg)
 
 		# Validate that there are no repeat barcodes 
-		if wells_config_df["barcodes"].duplicated().any():
+		if not wells_config_df["barcodes"].dropna().is_unique:
 			self.log("A barcode has been repeated. Please fix this in the sheet.")
 			raise TError(self.msg)
 
