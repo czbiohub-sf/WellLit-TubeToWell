@@ -328,7 +328,7 @@ class TubeToWellWidget(WellLitWidget):
 		# restart metadata collection
 		self.ids.textbox.funbind('on_text_validate', self.next)
 		self.ids.textbox.funbind('on_text_validate', self.scanPlate)
-		self.ids.status.text = "Please type in your name"
+		self.ids.status.text = "Please enter your name"
 
 		# reset metadata text
 		self.ids.plate_barcode_label.text = 'Plate Barcode: \n'
@@ -361,7 +361,7 @@ class TubeToWellWidget(WellLitWidget):
 			# bind textbox to scanPlate after name is scanned
 			self.ids.textbox.funbind('on_text_validate', self.scanUser)
 			self.ids.textbox.bind(on_text_validate=self.scanPlate)
-			self.ids.status.text = "Please type in your name"
+			self.ids.status.text = "Please enter your name"
 		else:
 			self.showBarcodeError('name')
 
