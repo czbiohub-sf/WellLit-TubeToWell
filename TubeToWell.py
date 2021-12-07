@@ -502,7 +502,8 @@ class TTWTransferProtocol(TransferProtocol):
 					# if it's after the first transfer, update the previous transfer as complete
 					if self._current_idx > 0:
 						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
-						previous_transfer.updateStatus(TStatus.completed)
+						if not previous_transfer.status == TStatus.failed:
+							previous_transfer.updateStatus(TStatus.completed)
 
 					self.sortTransfers()
 					self.log('transfer started: %s' % self.tf_id())
@@ -512,7 +513,8 @@ class TTWTransferProtocol(TransferProtocol):
 
 					if self._current_idx > 0:
 						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
-						previous_transfer.updateStatus(TStatus.completed)
+						if not previous_transfer.status == TStatus.failed:
+							previous_transfer.updateStatus(TStatus.completed)
 
 					self.sortTransfers()
 					tf = self.findTransferByBarcode(barcode)
