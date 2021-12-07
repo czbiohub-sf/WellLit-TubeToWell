@@ -187,8 +187,8 @@ class TubeToWellWidget(WellLitWidget):
 				for tf_id in self.ttw.tp.lists['started']:
 					self.ids.dest_plate.pl.markTarget(self.ttw.tp.transfers[tf_id]['dest_well'])
 
-				# mark failed wells as discarded
-				for tf_id in self.ttw.tp.lists["failed"]:
+				# mark discarded wells as discarded
+				for tf_id in self.ttw.tp.lists["discarded"]:
 					self.ids.dest_plate.pl.markDiscarded(self.ttw.tp.transfers[tf_id]['dest_well'])
 
 				# mark the control wells
@@ -305,7 +305,7 @@ class TubeToWellWidget(WellLitWidget):
 	def showAllTransfers(self):
 		"""Display the currently completed transfers to the user."""
 
-		output = "{:<30}{:^10}{:>15}".format("Barcode", "Tube", "Status")
+		output = "{:<30}{:^10}{:>15}".format("Barcode", "Well", "Status")
 		output += "\n"
 		for transfer_id in self.ttw.tp.tf_seq:
 			transfer = self.ttw.tp.transfers[transfer_id]

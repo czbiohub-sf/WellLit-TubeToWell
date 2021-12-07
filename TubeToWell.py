@@ -467,8 +467,7 @@ class TTWTransferProtocol(TransferProtocol):
 			well = transfer['dest_well']
 			if well == well_name:
 				self.discarded_well_barcode = transfer['source_tube']
-				transfer['source_tube'] = self.discarded_well_barcode+"-discarded"
-				transfer.updateStatus(TStatus.failed)
+				transfer.updateStatus(TStatus.discarded)
 		self.sortTransfers()
 
 	def plateComplete(self):
@@ -502,7 +501,7 @@ class TTWTransferProtocol(TransferProtocol):
 					# if it's after the first transfer, update the previous transfer as complete
 					if self._current_idx > 0:
 						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
-						if not previous_transfer.status == TStatus.failed:
+						if not previous_transfer.status == TStatus.discarded:
 							previous_transfer.updateStatus(TStatus.completed)
 
 					self.sortTransfers()
@@ -513,7 +512,7 @@ class TTWTransferProtocol(TransferProtocol):
 
 					if self._current_idx > 0:
 						previous_transfer = self.transfers[self.tf_seq[self._current_idx - 1]]
-						if not previous_transfer.status == TStatus.failed:
+						if not previous_transfer.status == TStatus.discarded:
 							previous_transfer.updateStatus(TStatus.completed)
 
 					self.sortTransfers()
@@ -557,14 +556,14 @@ class TTWTransferProtocol(TransferProtocol):
 	def uniqueBarcode(self, barcode):
 		for tf_id in self.tf_seq:
 			tf = self.transfers[tf_id]
-			if barcode == tf['source_tube'] and tf['status'] != 'failed':
+			if barcode == tf['source_tube'] and tf['status'] != 'discarded':
 				return False
 		return True
 
 	def findTransferByBarcode(self, barcode):
 		for tf_id in self.tf_seq:
 			tf = self.transfers[tf_id]
-			if barcode == tf['source_tube']:
+			if barcode == tf['source_tube'] and tf['status'] != 'discarded':
 				return tf
 		return None
 
