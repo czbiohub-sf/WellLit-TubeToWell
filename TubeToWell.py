@@ -194,7 +194,7 @@ class TubeToWell:
 		wells_config_df["wells"] = wells_config_df["wells"].str.upper()
 		wells_config_df["availability"] = wells_config_df["availability"].str.upper()
 
-		# First validate that the user entered wells are valid
+		# Validate that the user entered wells are valid
 		no_nan_wells = wells_config_df[wells_config_df["wells"].notna()]["wells"]
 		invalid_wells = ~no_nan_wells.isin(valid_wells)
 		if any(invalid_wells):
@@ -202,7 +202,12 @@ class TubeToWell:
 			self.log(f"Invalid well(s) encountered in column A: \n{list_of_invalid_rows}.")
 			raise TError(self.msg)
 
-		# Well names are valid, next check available/not available column for invalid entries
+		# Validate that there are no repeat barcodes 
+		if wells_config_df["barcodes"].duplicated().any():
+			self.log("A barcode has been repeated. Please fix this in the sheet.")
+			raise TError(self.msg)
+
+		# Validate the available/not available column for invalid entries
 		no_nan_availability = wells_config_df[wells_config_df["availability"].notna()]["availability"]
 		invalid_availability = ~no_nan_availability.isin(["AVAILABLE", "NOT AVAILABLE"])
 		if any(invalid_availability):
@@ -211,7 +216,6 @@ class TubeToWell:
 			raise TError(self.msg)
 
 		# Add the unavailable wells and mark the wells reserved for specific barcodes
-
 		# Note if a templating file is loaded, the default control wells (as specified in the json file) are discarded.
 		self.controls = []
 		for _, row in wells_config_df.iterrows():
