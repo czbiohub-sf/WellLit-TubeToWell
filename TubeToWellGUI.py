@@ -361,7 +361,7 @@ class TubeToWellWidget(WellLitWidget):
 			# bind textbox to scanPlate after name is scanned
 			self.ids.textbox.funbind('on_text_validate', self.scanUser)
 			self.ids.textbox.bind(on_text_validate=self.scanPlate)
-			self.ids.status.text = "Please scan or key in plate barcode"
+			self.ids.status.text = "Please type in your name"
 		else:
 			self.showBarcodeError('name')
 
