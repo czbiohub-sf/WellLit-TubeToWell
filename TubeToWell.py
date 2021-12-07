@@ -463,6 +463,7 @@ class TTWTransferProtocol(TransferProtocol):
 			well = transfer['dest_well']
 			if well == well_name:
 				self.discarded_well_barcode = transfer['source_tube']
+				transfer['source_tube'] = self.discarded_well_barcode+"-discarded"
 				transfer.updateStatus(TStatus.failed)
 		self.sortTransfers()
 
