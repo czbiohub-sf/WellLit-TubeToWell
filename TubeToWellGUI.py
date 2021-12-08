@@ -305,7 +305,7 @@ class TubeToWellWidget(WellLitWidget):
 	def showAllTransfers(self):
 		"""Display the currently completed transfers to the user."""
 
-		output = "{:<30}{:^10}{:>15}".format("Barcode", "Well", "Status")
+		output = "{:<30}{:^15}{:>15}".format("Barcode", "Well", "Status")
 		output += "\n"
 		for transfer_id in self.ttw.tp.tf_seq:
 			transfer = self.ttw.tp.transfers[transfer_id]
@@ -313,7 +313,7 @@ class TubeToWellWidget(WellLitWidget):
 				barcode = transfer["source_tube"]
 				dest_well = transfer["dest_well"]
 				status = transfer["status"]
-				line = "{:<30}{:^10}{:>15}".format(barcode, dest_well, status)
+				line = "{:<30}{:^25}{:>15}".format(barcode, dest_well, status)
 				output += line 
 				output += "\n"
 		self.showPopupWithScroll(output, "Current Transfers")
