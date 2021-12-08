@@ -284,7 +284,7 @@ class TubeToWellWidget(WellLitWidget):
 			self.showPopup("No previous well to discard", "Invalid well")
 
 	def discardWellConfirmation(self):
-		text = self.ids.textbox.text
+		text = self.ids.textbox.text.upper()
 		is_well = text in self.ttw.tp.valid_wells
 		if is_well:
 			if self.ttw.tp.isWellUsed(text):
