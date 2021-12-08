@@ -295,7 +295,7 @@ class TubeToWellWidget(WellLitWidget):
 			self.showPopup("Invalid well name entered.", "Invalid well")
 
 	def discardSpecificWell(self, _):
-		text = self.ids.textbox.text
+		text = self.ids.textbox.text.upper()
 		self.ttw.tp.discardSpecificWell(text)
 		self.ttw.writeTransferRecordFiles()
 		self.ids.textbox.text = ''
