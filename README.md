@@ -1,6 +1,7 @@
 # TubeToWell
 
-This repository contains the code needed to run the CZ Biohub's Well-Lit device in the "Tube to Well-Lit" configuration, as described in the
+This repository contains the code needed to run the CZ Biohub's Well-Lit device in the "Tube to Well-Lit" configuration, as described in the manuscript at:
+https://www.biorxiv.org/content/10.1101/2021.12.17.473010v2
 
 The files needed to build the Well-Lit device can be downloaded from https://osf.io/f9nh5/.
 
