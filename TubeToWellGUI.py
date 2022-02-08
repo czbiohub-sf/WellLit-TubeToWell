@@ -218,7 +218,7 @@ class TubeToWellWidget(WellLitWidget):
 		grid.add_widget(label)
 		self._popup = Popup(title=title, content=scroll)
 		self._popup.size_hint = (0.5, 0.3)
-		self._popup.pos_hint = {"x": 0.25, "y": 850 / Window.height}
+		self._popup.pos_hint = {"x": 0.25, "y": 650 / Window.height}
 		self._popup.open()
 
 	def next(self, blank):
@@ -327,8 +327,8 @@ class TubeToWellWidget(WellLitWidget):
 
 		# restart metadata collection
 		self.ids.textbox.funbind('on_text_validate', self.next)
-		self.ids.textbox.funbind('on_text_validate', self.scanPlate)
-		self.ids.status.text = "Please scan or key in the plate barcode"
+		self.ids.textbox.bind(on_text_validate=self.scanPlate)
+		self.ids.status.text = "Please scan or key in plate barcode"
 
 		# reset metadata text
 		self.ids.plate_barcode_label.text = 'Plate Barcode: \n'
