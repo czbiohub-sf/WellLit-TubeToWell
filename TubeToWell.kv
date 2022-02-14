@@ -22,16 +22,38 @@
 	markup: True
 	font_size: 20
 <Button>
-	font_size: 30
+	font_size: 25
 
 <LoadDialog>:
     BoxLayout:
     	size_hint: 0.8,0.2
-	    pos_hint: {'left': 1, 'top': 1}
+	    pos_hint: {'right': 0.8, 'top': 1}
         orientation: 'vertical'
         FileChooserListView:
             id: filechooser
             path: root.load_path
+			pos_hint: {'left': 500}
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			pos_hint: {'left': 1}
+            Button:
+                text: 'Cancel'
+                on_release: root.cancel()
+            Button:
+                text: 'Load'
+                on_release: root.load(filechooser.selection)
+				
+<ChooseSaveDirDialog>:
+	BoxLayout:
+    	size_hint: 0.8,0.2
+	    pos_hint: {'right': 0.8, 'top': 1}
+        orientation: 'vertical'
+        FileChooserListView:
+            id: filechooser
+            path: root.save_dir
 
 
         BoxLayout:
@@ -41,9 +63,28 @@
                 text: 'Cancel'
                 on_release: root.cancel()
             Button:
-                text: 'Load'
-                on_release: root.load(filechooser.selection)
+                text: 'Choose folder'
+                on_release: root.choose(filechooser.path)
 
+<ChooseTemplateDialog>:
+	BoxLayout:
+    	size_hint: 0.8,0.2
+	    pos_hint: {'right': 0.8, 'top': 1}
+        orientation: 'vertical'
+        FileChooserListView:
+            id: filechooser
+            path: root.template_path
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: 'Cancel'
+                on_release: root.cancel()
+            Button:
+                text: 'Load template'
+                on_release: root.choose(filechooser.selection)
 
 <TubeToWellWidget>:
 	orientation: 'vertical'
@@ -53,7 +94,7 @@
 		size_hint_y: 0.3
 		BoxLayout:
 			size_hint_x: None
-    		width: 300
+    		width: 400
 			id: metadata_box
 			orientation: 'vertical'
             Label:
@@ -88,30 +129,71 @@
 			    text: 'Load Sample List'
 			    on_press: root.show_load()
 
+			Button:
+				text: 'Choose Save Location'
+				on_press: root.showChooseSaveDirectory()
+
+			Button:
+				text: 'Load Template File'
+				on_press: root.showChooseTemplateFile()
+
 	    Label:
 	    	id: status
-	        text: "Please scan or key in plate barcode"
+	        text: "Please enter your name"
 	        font_size: 50
 	        bold: True
-    	BoxLayout:
+    	GridLayout:
     		size_hint_x: None
-    		width: 300
-		    orientation: 'vertical'
+    		width: 400
+		    cols: 2
 		    id: button_box
 		    TextInput:
 		    	id: textbox
 		    	multiline: False
 		    	size_hint_y: .5
 		    	focus: True
-		    Button:
-		    	text: 'Undo Last Tube'
-		    	on_press: root.undoTube()
+			Button:
+				text: 'Cancel Current Scan'
+				on_press: root.undoCurrentScan()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
+			Button:
+				text: 'Discard Last Well'
+				on_press: root.discardLastWell()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
+			Button:
+				text: 'Discard Specified Well'
+				on_press: root.discardWellConfirmation()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
+			Button:
+				text: "Show Completed Transfers"
+				on_press: root.showAllTransfers()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
+			Button:
+				text: "Skip next well"
+				on_press: root.skipWellConfirmation()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
 		    Button:
 		    	text: 'Finish Plate'
 		    	on_press: root.finishPlate()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
 		    Button:
 		        text: 'Quit'
 		        on_press: root.quit_button()
+				text_size: self.size
+				halign: 'center'
+				valign: 'middle'
     WellPlot:
         id: dest_plate
         shape: 'circle'
