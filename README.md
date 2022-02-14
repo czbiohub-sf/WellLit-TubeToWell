@@ -13,12 +13,13 @@ The files needed to build the Well-Lit device can be downloaded from https://osf
 3. Activate the environment with `conda activate WellLit`
 4. Install dependencies:<br/>
         `conda install matplotlib==3.1.3`<br/>
+        `conda install pandas`<br/>
         `conda install -c conda-forge kivy`<br/>
         `pip install kivy-garden`<br/>
         `garden install graph`<br/>
         `garden install matplotlib`<br/>
 5. Clone this repo https://github.com/czbiohub/WellLit-TubeToWell or download as a zip file and then unzip.
-6. Open a git bash terminal in the repository folder you just downloaded and enter the commands 'git submodule update --init' to finish obtaining the required files. If you are not using git and downloaded a zipped folder, then download and extract the repository at 'https://github.com/czbiohub/WellLit.git' into the '../WellLit' folder in the first repository you downloaded.
+6. Open a git bash terminal in the repository folder you just downloaded and enter the commands 'git submodule update --init' and then run `git submodule update --remote` to finish obtaining the required files. If you are not using git and downloaded a zipped folder, then download and extract the repository at 'https://github.com/czbiohub/WellLit.git' into the '../WellLit' folder in the first repository you downloaded.
 7. Create a shortcut to the 'startup.bat' file located in folder and place it on the desktop.
 8. Configure the barcode scanner:<br/>
          If using the same barcode scanner as listed in the bill of materials, users should configure it. Download and print the “Well-Lit Barcode Scanner Configuration Sheet.pdf” file. Connect the scanner to the PC and scan the barcodes on the sheet in a zig-zag pattern, from top to bottom, following the order of the numbers in red. Each barcode in this sheet configures a different aspect of the scanner.
@@ -35,7 +36,7 @@ To configure the software open 'wellLitConfig.json' in a text editor and modify 
 5. 'well_spacing' controls the distance between adjacent wells.
 6. 'samples_dir' sets the directory to load CSV files from if the user wishes to restrict plated samples to a pre-defined list.
 7. If using a barcode scanner, it must be configured to automatically add a return command after each barcode is decoded. If using the same barcode scanner as listed in the bill of materials, users should configure this setting by scanning the appropriate symbol on the 'Well Lit Scanner Configuration Sheet.pdf'.
-8. 'controls' specified wells that will be excluded from the sample transfer. If no controls are used this field should be left as empty quotation marks.
+8. 'controls' specified wells that will be excluded from the sample transfer. If no controls are used this field should be left as empty quotation marks. Note that as of the February 2022 update, a user can now supply a template csv file to select which wells to set as control. An example templating csv file is located in the `templates/` folder in this repository.
 
 
 ## Use instructions
@@ -52,12 +53,17 @@ The top area of the screen contains the main user interface, while the bottom di
 8. Wells are highlighted with the following colors:<br/>
        a. Yellow: Current transfer target well<br/>
        b. Red: Full wells<br/>
-       c. Gray: Empty wells<br/>
+       c. "Darkslate" Gray: Empty wells<br/>
        d. Blue: Re-scanned sample well (full)<br/>
-       e. White: Excluded/control wells (see software configuration section)
+       e. White: Excluded/control wells (see software configuration section) <br/>
+       f. Regular Gray: Discarded wells
 9. Tube to Well-Lit sample transfer procedure:<br/>
        a. Scan or type a tube name or barcode to light up the first available well in yellow. This is the target well. Wells are assigned to the tubes in a column-wise order (i.e. A1, B1, C1, ... A2, B2, C2, ...).<br/>
        b. After transferring an aliquot from the tube to the target (yellow) well, scan or enter the next tube's barcode to mark the previous transfer as complete and light up the next available well. The filled wells will be lit in red.<br/>
        c. Re-scanning a previously scanned tube will light its assigned well in blue.<br/>
        d. The last transfer can be undone with the “Undo Last Tube” button. The undone transfer is not included in the record file generated. You cannot undo more than one transfer per scan.
+       e. "Cancel Current Scan" - a button which allows a user to cancel the current scan and scan another tube. You would use this in cases where you accidentally scanned a tube when you meant to scan another one instead. The "cancelled scan" can still be scanned again later for aliquoting into another well.
+       f. "Discard Last Well" / "Discard Specified Well" - discard the last well. This allows the user to RE-SCAN whatever tube was aliquoted into the previous well and aliquot it into another well. The discarded well will be clearly marked in the records file (as "TUBEBARCODE-DISCARDED"). Additionally, the user can specify a specific well in the white-textbox (e.g "A3") and press "Discard Specified Well" to discard that particular well.
+       g. "Show Completed Transfers" - display a pop-up box listing all the transfers that have been done so far (including wells that have been discarded/skipped). 
+       h. "Skip well" - skips the next well and marks it as empty in the records file. You may want to do this in cases where you notice debris/contamination in a particular well and want to exclude it.
 10. Press “Finish Plate” when all the transfers have been completed. The program will automatically start a new record file for the next plate. For a new plate, follow the instructions starting at step 4 for the new plate.
