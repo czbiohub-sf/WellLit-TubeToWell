@@ -5,6 +5,8 @@ https://www.biorxiv.org/content/10.1101/2021.12.17.473010v2
 
 The files needed to build the Well-Lit device can be downloaded from https://osf.io/f9nh5/.
 
+**Note | Feb, 2022**: The software in this repository is more recent than that described in the manuscript. A few additional features have been added and are described below.
+
 
 ## Installation Instructions for Windows
 
@@ -57,14 +59,15 @@ The top area of the screen contains the main user interface, while the bottom di
        c. "Darkslate" Gray: Empty wells<br/>
        d. Blue: Re-scanned sample well (full)<br/>
        e. White: Excluded/control wells (see software configuration section) <br/>
-       f. Regular Gray: Discarded wells
+       f. Regular Gray: Discarded wells </br>
 9. Tube to Well-Lit sample transfer procedure:<br/>
        a. Scan or type a tube name or barcode to light up the first available well in yellow. This is the target well. Wells are assigned to the tubes in a column-wise order (i.e. A1, B1, C1, ... A2, B2, C2, ...).<br/>
        b. After transferring an aliquot from the tube to the target (yellow) well, scan or enter the next tube's barcode to mark the previous transfer as complete and light up the next available well. The filled wells will be lit in red.<br/>
        c. Re-scanning a previously scanned tube will light its assigned well in blue.<br/>
-       d. The last transfer can be undone with the “Undo Last Tube” button. The undone transfer is not included in the record file generated. You cannot undo more than one transfer per scan.
-       e. "Cancel Current Scan" - a button which allows a user to cancel the current scan and scan another tube. You would use this in cases where you accidentally scanned a tube when you meant to scan another one instead. The "cancelled scan" can still be scanned again later for aliquoting into another well.
-       f. "Discard Last Well" / "Discard Specified Well" - discard the last well. This allows the user to RE-SCAN whatever tube was aliquoted into the previous well and aliquot it into another well. The discarded well will be clearly marked in the records file (as "TUBEBARCODE-DISCARDED"). Additionally, the user can specify a specific well in the white-textbox (e.g "A3") and press "Discard Specified Well" to discard that particular well.
-       g. "Show Completed Transfers" - display a pop-up box listing all the transfers that have been done so far (including wells that have been discarded/skipped). 
-       h. "Skip well" - skips the next well and marks it as empty in the records file. You may want to do this in cases where you notice debris/contamination in a particular well and want to exclude it.
+       d. The last transfer can be undone with the “Undo Last Tube” button. The undone transfer is not included in the record file generated. You cannot undo more than one transfer per scan. <br/>
+       e. "Cancel Current Scan" - a button which allows a user to cancel the current scan and scan another tube. You would use this in cases where you accidentally scanned a tube when you meant to scan another one instead. The "cancelled scan" can still be scanned again later for aliquoting into another well. <br/>
+       f. "Discard Last Well" / "Discard Specified Well" - discard the last well. This allows the user to RE-SCAN whatever tube was aliquoted into the previous well and aliquot it into another well. The discarded well will be clearly marked in the records file (as "TUBEBARCODE-DISCARDED"). Additionally, the user can specify a specific well in the white-textbox (e.g "A3") and press "Discard Specified Well" to discard that particular well. <br/>
+       g. "Show Completed Transfers" - display a pop-up box listing all the transfers that have been done so far (including wells that have been discarded/skipped). <br/>
+       h. "Skip well" - skips the next well and marks it as empty in the records file. You may want to do this in cases where you notice debris/contamination in a particular well and want to exclude it. This well is marked as "EMPTY" in the records file.
+       
 10. Press “Finish Plate” when all the transfers have been completed. The program will automatically start a new record file for the next plate. For a new plate, follow the instructions starting at step 4 for the new plate.
