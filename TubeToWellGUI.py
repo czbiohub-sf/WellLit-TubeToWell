@@ -254,7 +254,7 @@ class TubeToWellWidget(WellLitWidget):
 		grid.add_widget(label)
 		self._popup = Popup(title=title, content=scroll)
 		self._popup.size_hint = (0.5, 0.3)
-		self._popup.pos_hint = {"x": 0.25, "y": 650 / Window.height}
+		self._popup.pos_hint = {"x": 0.25, "y": 0.7}
 		self._popup.open()
 
 	def next(self, blank):
