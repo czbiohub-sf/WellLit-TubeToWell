@@ -22,7 +22,7 @@ The files needed to build the Well-Lit device can be downloaded from https://osf
         `garden install graph`<br/>
         `garden install matplotlib`<br/>
 5. Clone this repo https://github.com/czbiohub/WellLit-TubeToWell or download as a zip file and then unzip.
-6. Open a git bash terminal in the repository folder you just downloaded and enter the commands 'git submodule update --init' and then run `git submodule update --remote` to finish obtaining the required files. If you are not using git and downloaded a zipped folder, then download and extract the repository at 'https://github.com/czbiohub/WellLit.git' into the '../WellLit' folder in the first repository you downloaded.
+6. Open a git bash terminal in the repository folder you just downloaded and enter the commands `git submodule update --init` and then run `git submodule update --remote` to finish obtaining the required files. If you are not using git and downloaded a zipped folder, then download and extract the repository at 'https://github.com/czbiohub/WellLit.git' into the '../WellLit' folder in the first repository you downloaded.
 7. Create a shortcut to the 'startup.bat' file located in folder and place it on the desktop.
 8. Configure the barcode scanner:<br/>
          If using the same barcode scanner as listed in the bill of materials, users should configure it. Download and print the “Well-Lit Barcode Scanner Configuration Sheet.pdf” file. Connect the scanner to the PC and scan the barcodes on the sheet in a zig-zag pattern, from top to bottom, following the order of the numbers in red. Each barcode in this sheet configures a different aspect of the scanner.
