@@ -220,7 +220,6 @@ class TubeToWellWidget(WellLitWidget):
 					self.ids.dest_plate.pl.markTarget(
 						self.ttw.tp.transfers[tf_id]["dest_well"]
 					)
-
 				# mark discarded wells as discarded
 				for tf_id in self.ttw.tp.lists["discarded"]:
 					self.ids.dest_plate.pl.markDiscarded(
@@ -269,6 +268,10 @@ class TubeToWellWidget(WellLitWidget):
 		try:
 			self.ttw.next(barcode)
 			self.updateLights()
+			well = ''
+			for tf_id in self.ttw.tp.lists["started"]:
+				well = self.ttw.tp.transfers[tf_id]["dest_well"]
+			self.ids.status.text = f"Current scan:\n{barcode} -> {well}"
 		except TError as err:
 			self.showPopup(err, "Unable to complete")
 			self.status = self.ttw.msg
@@ -475,5 +478,5 @@ class TubeToWellWidget(WellLitWidget):
 
 if __name__ == "__main__":
 	Window.size = (1600, 1200)
-	Window.fullscreen = True
+	Window.fullscreen = False
 	TubeToWellApp().run()

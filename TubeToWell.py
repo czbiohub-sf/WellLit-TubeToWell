@@ -283,6 +283,7 @@ class TubeToWell:
 		# Add the unavailable wells and mark the wells reserved for specific barcodes
 		# Note if a templating file is loaded, the default control wells (as specified in the json file) are discarded.
 		self.controls = []
+		self.barcode_to_well = {}
 		for _, row in wells_config_df.iterrows():
 			well_number = row["wells"]
 			availability = row["availability"]
