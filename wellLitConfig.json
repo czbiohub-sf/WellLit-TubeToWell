@@ -16,7 +16,7 @@
     "A1_X_dest": 0.2325,
     "A1_Y_dest": 0.1325,
     "size_param": {
-        "circle" : 0.024,
+        "circle" : 0.020,
         "square" : 0.04
     },
     "well_spacing": 0.045
