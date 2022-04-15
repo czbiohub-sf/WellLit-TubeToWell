@@ -3,6 +3,7 @@
     "samples_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Samples\\",
     "templates_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Templates\\",
     "controls" : [],
+    "enable_scan_out" : true,
     "384": {
     "A1_X_dest": 0.235,
     "A1_Y_dest": 0.135,

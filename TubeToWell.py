@@ -32,9 +32,11 @@ class TubeToWell:
 		self.samples_dir = configs["samples_dir"]
 		self.templates_dir = configs["templates_dir"]
 		self.controls = configs["controls"]
+		self.enable_scan_out = configs["enable_scan_out"]
 		self.barcode_to_well = {}
 		self.csv = ""
 		self.warning_file_path = ""
+		self.scanned_out = True
 
 		if not os.path.isdir(self.records_dir):
 			self.records_dir = cwd + "/records/"
@@ -86,26 +88,40 @@ class TubeToWell:
 			# First check to see if this is a specifically assigned barcode
 			# (i.e a tube that should go to a specific well)
 			barcode = str(barcode)
-			if barcode in self.barcode_to_well.keys():
-				found_well = False
 
-				# Find the transfer with this barcode
-				for i, tf_id in enumerate(self.tp.tf_seq):
-					tf = self.tp.transfers[tf_id]
-					if barcode == tf["source_tube"] and tf["status"] not in ["completed",'discarded']:
-						found_well = True
-						id = tf.id
-						self.tp.tf_seq.insert(self.tp._current_idx, id)
-						self.tp.tf_seq.pop(i + 1)
-						self.tp.next(barcode)
-						self.writeTransferRecordFiles()
-						break
-				# If the well is not found above (for example, because the user discarded the originally reserved well for that barcode),
-				# scan through all the other wells to see if any are available (i.e not reserved and can be used)
-				if found_well == False:
+			if self.enable_scan_out:
+				# Get the current transfer
+				if not self.scanned_out:
 					for i, tf_id in enumerate(self.tp.tf_seq):
 						tf = self.tp.transfers[tf_id]
-						if tf["source_tube"] not in self.barcode_to_well.keys() and tf["status"] not in ["completed", "started", "discarded"]:
+						if tf['status'] == "started":
+							prev_barcode = tf['source_tube']
+							if prev_barcode == barcode:
+								self.scanned_out = True
+								tf.updateStatus(TStatus.completed)
+								self.tp.sortTransfers()
+								return
+							else:
+								self.log(
+									f"You scanned a new barcode ({barcode}) without scanning out the current one ({prev_barcode})."
+								)
+								raise TError(self.msg)
+					self.scanned_out = True
+
+			if self.scanned_out or (not self.enable_scan_out):
+				self.scanned_out = False
+				if barcode in self.barcode_to_well.keys():
+					found_well = False
+
+					# Find the transfer with this barcode
+					for i, tf_id in enumerate(self.tp.tf_seq):
+						tf = self.tp.transfers[tf_id]
+						if barcode == tf["source_tube"] and tf["status"] == "completed":
+							# This raises a duplicate barcode error message to the user
+							found_well = True
+							self.tp.next(barcode)
+							break
+						if barcode == tf["source_tube"] and tf["status"] not in ["completed",'discarded']:
 							found_well = True
 							id = tf.id
 							self.tp.tf_seq.insert(self.tp._current_idx, id)
@@ -113,39 +129,52 @@ class TubeToWell:
 							self.tp.next(barcode)
 							self.writeTransferRecordFiles()
 							break
+					# If the well is not found above (for example, because the user discarded the originally reserved well for that barcode),
+					# scan through all the other wells to see if any are available (i.e not reserved and can be used)
+					if found_well == False:
+						for i, tf_id in enumerate(self.tp.tf_seq):
+							tf = self.tp.transfers[tf_id]
+							if tf["source_tube"] not in self.barcode_to_well.keys() and tf["status"] not in ["completed", "started", "discarded"]:
+								found_well = True
+								id = tf.id
+								self.tp.tf_seq.insert(self.tp._current_idx, id)
+								self.tp.tf_seq.pop(i + 1)
+								self.tp.next(barcode)
+								self.writeTransferRecordFiles()
+								break
 
-				# If no well can be found, inform the user.
-				if found_well == False:
-					self.log(
-						f"The tube you scanned, {barcode}, is a reserved well, however it looks like you discarded this well and there are no other available wells to aliquot into."
-					)
-					raise TError(self.msg)
+					# If no well can be found, inform the user.
+					if found_well == False:
+						self.log(
+							f"The tube you scanned, {barcode}, belongs to a reserved well, however it looks like you discarded this well and there are no other available wells to aliquot into."
+						)
+						raise TError(self.msg)
 
-			elif self.sample_list is None:
-				# find the next non-reserved well in the sequence
-				found_well = False
-				for i, tf_id in enumerate(self.tp.tf_seq):
-					tf = self.tp.transfers[tf_id]
-					if tf["source_tube"] not in self.barcode_to_well.keys() and tf[
-						"status"
-					] not in ["started", "completed", "discarded"]:
-						id = tf.id
-						self.tp.tf_seq.insert(self.tp._current_idx, id)
-						self.tp.tf_seq.pop(i + 1)
-						found_well = True
-						break
-				if found_well == True:
+				elif self.sample_list is None:
+					# find the next non-reserved well in the sequence
+					found_well = False
+					for i, tf_id in enumerate(self.tp.tf_seq):
+						tf = self.tp.transfers[tf_id]
+						if tf["source_tube"] not in self.barcode_to_well.keys() and tf[
+							"status"
+						] not in ["started", "completed", "discarded"]:
+							id = tf.id
+							self.tp.tf_seq.insert(self.tp._current_idx, id)
+							self.tp.tf_seq.pop(i + 1)
+							found_well = True
+							break
+					if found_well == True:
+						self.tp.next(barcode)
+						self.writeTransferRecordFiles()
+					else:
+						self.log(
+							f"The tube you scanned, {barcode}, is NOT on the list and there are no spare non-reserved wells available."
+						)
+						raise TError(self.msg)
+				else:
+					self.checkSampleList(barcode)
 					self.tp.next(barcode)
 					self.writeTransferRecordFiles()
-				else:
-					self.log(
-						f"The tube you scanned, {barcode}, is NOT on the list and there are no spare non-reserved wells available."
-					)
-					raise TError(self.msg)
-			else:
-				self.checkSampleList(barcode)
-				self.tp.next(barcode)
-				self.writeTransferRecordFiles()
 
 	def skip(self):
 		if self.tp_present():
@@ -661,6 +690,7 @@ class TTWTransferProtocol(TransferProtocol):
 				raise TError(self.msg)
 
 	def uniqueBarcode(self, barcode):
+		print(barcode)
 		for tf_id in self.tf_seq:
 			tf = self.transfers[tf_id]
 			if barcode in self.barcode_to_well.keys():

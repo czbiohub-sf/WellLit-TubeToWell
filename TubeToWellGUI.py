@@ -268,7 +268,7 @@ class TubeToWellWidget(WellLitWidget):
 		try:
 			self.ttw.next(barcode)
 			self.updateLights()
-			well = ''
+			well = 'COMPLETED'
 			for tf_id in self.ttw.tp.lists["started"]:
 				well = self.ttw.tp.transfers[tf_id]["dest_well"]
 			self.ids.status.text = f"Current scan:\n{barcode} -> {well}"
