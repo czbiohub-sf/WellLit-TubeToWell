@@ -82,7 +82,7 @@ def backup_and_update():
                 old_template = json.load(json_file)
             compare_dict_and_update(new_default_config, old_template)
             with open(new_path, 'w') as outfile:
-                json.dump(old_template, outfile)
+                json.dump(old_template, outfile, indent=4)
 
     # Remove the backup folder
     os.system(f"rm -rf {backup_folder}")
