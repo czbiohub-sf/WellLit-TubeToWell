@@ -23,7 +23,7 @@ class TubeToWell:
 		self.cwd = os.getcwd()
 		self.config_dir = os.path.join(self.cwd, "configs/")
 
-		config_path = os.path.join(self.cwd, "wellLitConfig.json")
+		config_path = os.path.join(self.config_dir, "DEFAULT_CONFIG.json")
 		with open(config_path) as json_file:
 			configs = json.load(json_file)
 
@@ -459,11 +459,6 @@ class TTWTransferProtocol(TransferProtocol):
 		super(TTWTransferProtocol, self).__init__(**kwargs)
 		self.msg = ""
 		self.controls = controls
-		cwd = os.getcwd()
-		config_path = os.path.join(cwd, "wellLitConfig.json")
-		with open(config_path) as json_file:
-			configs = json.load(json_file)
-
 		self.num_wells = num_wells
 		self.barcode_to_well = ttw.barcode_to_well
 		self.buildTransferProtocol(ttw)
