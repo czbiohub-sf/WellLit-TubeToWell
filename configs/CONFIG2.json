@@ -5,13 +5,13 @@
     "controls" : [],
     "enable_scan_out" : true,
     "384": {
-    "A1_X_dest": 0.235,
-    "A1_Y_dest": 0.135,
+    "A1_X_dest": 0.2255,
+    "A1_Y_dest": 0.150,
     "size_param": {
-        "circle": 0.012,
+        "circle": 0.006,
         "square": 0.02
     },
-    "well_spacing": 0.0185
+    "well_spacing": 0.0220
 },
     "96": {
     "A1_X_dest": 0.2325,
