@@ -86,12 +86,8 @@ def backup_and_update():
                 json.dump(old_template, outfile, indent=4)
 
     # Remove the backup folder
-    try:
-        # posix
-        os.system(f"rm -rf {backup_folder}")
-    except:
-        # windows
-        os.system(f"rd /s /q {backup_folder}")
+    # windows
+    os.system(f"rd /s /q {backup_folder}")
 
 if __name__ == "__main__":
     # test_cases()
