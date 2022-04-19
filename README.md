@@ -30,7 +30,7 @@ The files needed to build the Well-Lit device can be downloaded from https://osf
 
 ### Software Configuration
 
-To configure the software open 'wellLitConfig.json' in a text editor and modify the following entries to suit the users application. If invalid directory locations are given in this configuration file, the software will default to using subfolders named 'samples', 'records', and 'protocols' in the parent repository folder.
+To configure the software, edit the configuration files located in the folder `/configs` (e.g `CONFIG1.json` or `CONFIG2.json`). Open one of the files in a text editor and modify the following entries to suit the users application. If invalid directory locations are given in this configuration file, the software will default to using subfolders named 'samples', 'records', and 'protocols' in the parent repository folder. When you start the application you will be prompted to pick a configuration file (if you don't make a selection, it will use the `DEFAULT_CONFIG.json` template.)
 
 1. 'num_wells' configures the software for either 96 or 384 well format. If an invalid number is entered the software defaults to 96-well format.
 2. 'records_dir' configures the directory for storing records. The software automatically records every transfer in a CSV file with timestamps as soon as the action is completed.
@@ -52,7 +52,7 @@ The top area of the screen contains the main user interface, while the bottom di
 4. The user will be prompted to enter the user name and the plate name/barcode. All prompted information can either be scanned or entered manually by clicking in the white text entry box on the top-right corner of the screen.
 5. Insert the plate into the holder. Ensure that the A1 well is in the top left corner of the holder (the holder for each type of multi-well plate is designed to ensure that the plate can only be inserted in the right orientation).
 6. If the user wishes to restrict tube barcodes to come from a pre-defined list, for example to guard against errors when manually typing by hand or segregating tubes by batches that may have been mixed up, press “Load Sample List” to select a CSV file of tube barcodes. Only barcodes from this list will be accepted by the machine for assigning to a well.
-7. Each user action is recorded with a timestamp in a CSV file saved to the folder specified in the the 'wellLitConfig.json' configuration file ('records_dir' parameter - see Software Configuration section).
+7. Each user action is recorded with a timestamp in a CSV file saved to the folder specified in the the configuration file you selected on start-up ('records_dir' parameter - see Software Configuration section).
 8. Wells are highlighted with the following colors:<br/>
        a. Yellow: Current transfer target well<br/>
        b. Red: Full wells<br/>
