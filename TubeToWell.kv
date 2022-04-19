@@ -66,26 +66,6 @@
                 text: 'Choose folder'
                 on_release: root.choose(filechooser.path)
 
-<ChooseTemplateDialog>:
-	BoxLayout:
-    	size_hint: 0.8,0.2
-	    pos_hint: {'right': 0.8, 'top': 1}
-        orientation: 'vertical'
-        FileChooserListView:
-            id: filechooser
-            path: root.template_path
-
-
-        BoxLayout:
-            size_hint_y: None
-            height: 30
-            Button:
-                text: 'Cancel'
-                on_release: root.cancel()
-            Button:
-                text: 'Load template'
-                on_release: root.choose(filechooser.selection)
-
 <TubeToWellWidget>:
 	orientation: 'vertical'
 	BoxLayout:

@@ -20,9 +20,10 @@ class TubeToWell:
 	def __init__(self):
 
 		# load in configuration settings
-		# if records_dir is not present, default to folder in this repo
-		cwd = os.getcwd()
-		config_path = os.path.join(cwd, "wellLitConfig.json")
+		self.cwd = os.getcwd()
+		self.config_dir = os.path.join(self.cwd, "configs/")
+
+		config_path = os.path.join(self.cwd, "wellLitConfig.json")
 		with open(config_path) as json_file:
 			configs = json.load(json_file)
 
@@ -39,13 +40,13 @@ class TubeToWell:
 		self.scanned_out = True
 
 		if not os.path.isdir(self.records_dir):
-			self.records_dir = cwd + "/records/"
+			self.records_dir = self.cwd + "/records/"
 
 		if not os.path.isdir(self.samples_dir):
-			self.samples_dir = cwd + "/samples/"
+			self.samples_dir = self.cwd + "/samples/"
 
 		if not os.path.isdir(self.templates_dir):
-			self.templates_dir = cwd + "/templates/"
+			self.templates_dir = self.cwd + "/templates/"
 
 		self.warningsMade = False
 		self.timestamp = ""
@@ -55,7 +56,7 @@ class TubeToWell:
 		self.user = ""
 		self.tp = None
 		self.sample_list = None
-		self.tp = TTWTransferProtocol(self, controls=self.controls)
+		self.tp = TTWTransferProtocol(self, controls=self.controls, num_wells=self.num_wells)
 
 	def reset(self):
 		self.timestamp = ""
@@ -64,7 +65,7 @@ class TubeToWell:
 		self.msg = ""
 		self.user = ""
 		self.csv = ""
-		self.tp = TTWTransferProtocol(self, controls=self.controls)
+		self.tp = TTWTransferProtocol(self, controls=self.controls, num_wells=self.num_wells)
 		self.warningsMade = False
 		self.warning_file_path = ""
 		self.sample_list = None
@@ -224,6 +225,39 @@ class TubeToWell:
 		if barcode not in self.sample_list:
 			raise TError("Sample barcode not in list of pre-defined sample names.")
 
+	def setConfigurationFile(self, filename):
+		err = False
+		try:
+			with open(filename) as json_file:
+				configs = json.load(json_file)
+		except:
+			err = True
+			self.log(
+				f"Failed to load configuration file (tried to load {filename}). Loading default configuration file and continuing..."
+			)
+		self.num_wells = configs["num_wells"]
+		self.records_dir = configs["records_dir"]
+		self.custom_records_dir = None
+		self.samples_dir = configs["samples_dir"]
+		self.templates_dir = configs["templates_dir"]
+		self.controls = configs["controls"]
+		self.enable_scan_out = configs["enable_scan_out"]
+		self.barcode_to_well = {}
+		self.csv = ""
+		self.warning_file_path = ""
+		self.scanned_out = True
+
+		if not os.path.isdir(self.records_dir):
+			self.records_dir = self.cwd + "/records/"
+
+		if not os.path.isdir(self.samples_dir):
+			self.samples_dir = self.cwd + "/samples/"
+
+		if not os.path.isdir(self.templates_dir):
+			self.templates_dir = self.cwd + "/templates/"
+		if err:
+			raise TError(self.msg)
+
 	def loadCSV(self, filename):
 		"""
 		Loads in a csv file of sample names to be verified.
@@ -329,7 +363,7 @@ class TubeToWell:
 				barcode = str(barcode)
 				self.barcode_to_well[barcode] = well_number
 
-		self.tp = TTWTransferProtocol(self, controls=self.controls)
+		self.tp = TTWTransferProtocol(self, controls=self.controls, num_wells=self.num_wells)
 
 	def setSaveDirectory(self, directory):
 		"""Sets the location to save records"""
@@ -421,7 +455,7 @@ class TTWTransferProtocol(TransferProtocol):
 	and tracking tube origins and transfer status
 	"""
 
-	def __init__(self, ttw: TubeToWell, controls=None, **kwargs):
+	def __init__(self, ttw: TubeToWell, controls=None, num_wells=96, **kwargs):
 		super(TTWTransferProtocol, self).__init__(**kwargs)
 		self.msg = ""
 		self.controls = controls
@@ -430,7 +464,7 @@ class TTWTransferProtocol(TransferProtocol):
 		with open(config_path) as json_file:
 			configs = json.load(json_file)
 
-		self.num_wells = configs["num_wells"]
+		self.num_wells = num_wells
 		self.barcode_to_well = ttw.barcode_to_well
 		self.buildTransferProtocol(ttw)
 		self.lightup_well = None  # special well that can be lit up under different edge cases (e.g. rescan)

@@ -10,7 +10,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
 from kivy.properties import StringProperty
@@ -30,8 +29,11 @@ def on_focus(instance, value):
 
 class TubeToWellApp(App):
 	def build(self):
-		return TubeToWellWidget()
+		self.t = TubeToWellWidget()
+		return self.t
 
+	def on_start(self):
+		self.t.showChooseConfigFile()
 
 class LoadDialog(FloatLayout):
 	load = ObjectProperty(None)
@@ -43,13 +45,6 @@ class ChooseSaveDirDialog(FloatLayout):
 	choose = ObjectProperty(None)
 	cancel = ObjectProperty(None)
 	save_dir = StringProperty("")
-
-
-class ChooseTemplateDialog(FloatLayout):
-	choose = ObjectProperty(None)
-	cancel = ObjectProperty(None)
-	template_path = StringProperty("")
-
 
 class TubeToWellWidget(WellLitWidget):
 	"""
@@ -69,8 +64,8 @@ class TubeToWellWidget(WellLitWidget):
 		self.confirm_popup = ConfirmPopup()
 		self.load_path = self.ttw.samples_dir
 		self.templates_path = self.ttw.templates_dir
+		self.configs_path = self.ttw.config_dir
 		self.status = ""
-		self.ids.dest_plate.initialize()
 		self.filename = None
 		self.save_directory = None
 		self.template_file = None
@@ -86,14 +81,17 @@ class TubeToWellWidget(WellLitWidget):
 		self.ttw.writeTransferRecordFiles()
 		self.showPopup("Are you sure you want to exit?", "Confirm exit", func=self.quit)
 
-	def show_load(self):
+	def chooseFileDialog(self, load_file_func, cancel_func, dir_path, popup_title):
 		content = LoadDialog(
-			load=self.load, cancel=self.dismiss_popup, load_path=self.load_path
+			load=load_file_func, cancel=cancel_func, load_path=dir_path
 		)
-		self._popup = Popup(title="Load File", content=content)
+		self._popup = Popup(title=popup_title, content=content)
 		self._popup.size_hint = (0.4, 0.8)
 		self._popup.pos_hint = {"x": 10.0 / Window.width, "y": 100 / Window.height}
 		self._popup.open()
+
+	def show_load(self):
+		self.chooseFileDialog(self.load, self.dismiss_popup, self.load_path, popup_title="Load File")
 
 	def load(self, filename):
 		self.dismiss_popup()
@@ -107,7 +105,7 @@ class TubeToWellWidget(WellLitWidget):
 			func=self.loadSamples,
 		)
 
-	def loadSamples(self, button):
+	def loadSamples(self, _):
 		if self.filename:
 			filename = self.filename[0]
 		else:
@@ -122,15 +120,7 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(conf, "Load Successful")
 
 	def showChooseTemplateFile(self):
-		content = ChooseTemplateDialog(
-			choose=self._chooseTemplateFile,
-			cancel=self.dismiss_popup,
-			template_path=self.templates_path,
-		)
-		self._popup = Popup(title="Choose template file", content=content)
-		self._popup.size_hint = (0.4, 0.8)
-		self._popup.pos_hint = {"x": 10.0 / Window.width, "y": 100 / Window.height}
-		self._popup.open()
+		self.chooseFileDialog(self._chooseTemplateFile, self.dismiss_popup, self.templates_path, popup_title="Choose template file")
 
 	def _chooseTemplateFile(self, filename):
 		self.dismiss_popup()
@@ -158,11 +148,41 @@ class TubeToWellWidget(WellLitWidget):
 			except TConfirm as conf:
 				self.showPopup(conf, "Load Successful")
 
+	def showChooseConfigFile(self):
+		self.chooseFileDialog(self._chooseConfigFile, self.dismiss_popup, self.configs_path, popup_title="Choose configuration file")
+
+	def _chooseConfigFile(self, filename):
+		self.dismiss_popup()
+		self.config_file = filename
+		self.showPopup(
+			TConfirm(
+				"Load a configuration file which sets the plate type (96 or 384) and other parameters."
+				" Are you sure?"
+			),
+			"Confirm configuration file load",
+			func=self._loadConfigurationFile,
+		)
+
+	def _loadConfigurationFile(self, _):
+		if self.config_file:
+			filename = self.config_file[0]
+		else:
+			self.showPopup(TError("Invalid target to load"), "Unable to load file")
+
+		if os.path.isfile(str(filename)):
+			try:
+				self.ttw.setConfigurationFile(filename)
+				self.ids.dest_plate.initialize(filename)
+			except TError as err:
+				self.showPopup(err, "Load Failed")
+			except TConfirm as conf:
+				self.showPopup(conf, "Load Successful")
+
 	def showChooseSaveDirectory(self):
 		content = ChooseSaveDirDialog(
 			choose=self.chooseDirectory,
 			cancel=self.dismiss_popup,
-			save_dir=self.load_path,
+			save_dir="/configs/",
 		)
 		self._popup = Popup(title="Choose folder", content=content)
 		self._popup.size_hint = (0.4, 0.8)
@@ -175,7 +195,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.showPopup(
 			TConfirm(
 				f"The outputted csv file will be saved to: {directory}. "
-				"Are you sure?"
+				" Are you sure?"
 			),
 			"Confirm save directory location",
 			func=self._chooseDirectory,
@@ -477,6 +497,6 @@ class TubeToWellWidget(WellLitWidget):
 
 
 if __name__ == "__main__":
-	Window.size = (1600, 1200)
+	Window.size = (2560, 1600)
 	Window.fullscreen = True
 	TubeToWellApp().run()
