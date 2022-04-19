@@ -2,6 +2,7 @@ import platform
 import os
 import shutil
 import json
+from pathlib import Path
 
 CONFIG_DIR = "configs/"
 DEFAULT_CONFIG = os.path.join(CONFIG_DIR, "DEFAULT_CONFIG.json")
@@ -87,7 +88,9 @@ def backup_and_update():
 
     # Remove the backup folder
     # windows
-    os.system(f"rd -r {backup_folder}")
+    cwd = os.getcwd()
+    backup_fullpath = os.path.join(cwd, backup_folder)
+    os.system(f"rmdir /s /q {backup_fullpath}")
 
 if __name__ == "__main__":
     # test_cases()
