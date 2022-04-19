@@ -149,7 +149,7 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(conf, "Load Successful")
 
 	def showChooseConfigFile(self):
-		self.chooseFileDialog(self._chooseConfigFile, self.dismiss_popup, self.configs_path, popup_title="Choose configuration file")
+		self.chooseFileDialog(self._chooseConfigFile, self.loadDefaultConfig, self.configs_path, popup_title="Choose configuration file")
 
 	def _chooseConfigFile(self, filename):
 		self.dismiss_popup()
@@ -177,6 +177,13 @@ class TubeToWellWidget(WellLitWidget):
 				self.showPopup(err, "Load Failed")
 			except TConfirm as conf:
 				self.showPopup(conf, "Load Successful")
+
+	def loadDefaultConfig(self):
+		cwd = os.getcwd()
+		config_path = os.path.join(cwd, "configs", "DEFAULT_CONFIG.json")
+		self.ttw.setConfigurationFile(config_path)
+		self.ids.dest_plate.initialize(config_path)
+		self.dismiss_popup()
 
 	def showChooseSaveDirectory(self):
 		content = ChooseSaveDirDialog(
