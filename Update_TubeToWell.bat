@@ -1,5 +1,5 @@
 echo "Beginning update..."
 echo "==================="
-python3 update.py
+python update.py
 echo "Done updating!"
 pause
