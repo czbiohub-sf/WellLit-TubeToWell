@@ -255,6 +255,9 @@ class TubeToWell:
 
 		if not os.path.isdir(self.templates_dir):
 			self.templates_dir = self.cwd + "/templates/"
+
+		self.tp = TTWTransferProtocol(self, controls=self.controls, num_wells=self.num_wells)
+		
 		if err:
 			raise TError(self.msg)
 
