@@ -60,7 +60,7 @@ def test_cases():
 def backup_and_update():
     # 1. Make a backup of the configs/ folder
     try:
-        shutil.copytree(CONFIG_DIR, backup_folder)
+        shutil.copytree(CONFIG_DIR, backup_folder, dirs_exist_ok=True)
     except Exception as e:
         print(f"Errored while creating a backup of the `configs/` folder. Aborting and exiting. \nError: \n{e}")
         quit()
@@ -85,12 +85,6 @@ def backup_and_update():
             compare_dict_and_update(new_default_config, old_template)
             with open(new_path, 'w') as outfile:
                 json.dump(old_template, outfile, indent=4)
-
-    # Remove the backup folder
-    # windows
-    cwd = os.getcwd()
-    backup_fullpath = os.path.join(cwd, backup_folder)
-    os.system(f"rmdir /s /q {backup_fullpath}")
 
 if __name__ == "__main__":
     # test_cases()
