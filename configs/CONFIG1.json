@@ -1,0 +1,25 @@
+{   "num_wells": "96",
+    "records_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Records\\",
+    "samples_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Samples\\",
+    "templates_dir": "C:\\Users\\Welllit\\Desktop\\WellLit_Templates\\",
+    "controls" : [],
+    "enable_scan_out" : true,
+    "384": {
+    "A1_X_dest": 0.235,
+    "A1_Y_dest": 0.135,
+    "size_param": {
+        "circle": 0.012,
+        "square": 0.02
+    },
+    "well_spacing": 0.0185
+},
+    "96": {
+    "A1_X_dest": 0.2325,
+    "A1_Y_dest": 0.1325,
+    "size_param": {
+        "circle" : 0.020,
+        "square" : 0.04
+    },
+    "well_spacing": 0.045
+}
+} 
