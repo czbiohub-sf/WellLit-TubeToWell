@@ -87,7 +87,7 @@ def backup_and_update():
 
     # Remove the backup folder
     # windows
-    os.system(f"rd /s /q {backup_folder}")
+    os.system(f"rd -r {backup_folder}")
 
 if __name__ == "__main__":
     # test_cases()
