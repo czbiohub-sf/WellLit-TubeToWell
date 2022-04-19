@@ -8,12 +8,6 @@ CONFIG_DIR = "configs/"
 DEFAULT_CONFIG = os.path.join(CONFIG_DIR, "DEFAULT_CONFIG.json")
 backup_folder = "configs_backup/"
 
-# Check if new key is in the old dict
-# if no, then add the new key and its value pair to the old dict
-# if yes, check if the new key is a dict 
-# if yes, get all the keys of the new key's dict and all the key's of the old key's dict and compare those
-# if no, return
-
 def compare_dict_and_update(dict_new, dict_old):
     keys = dict_new.keys()
     for key in keys:
