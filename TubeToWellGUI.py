@@ -504,6 +504,6 @@ class TubeToWellWidget(WellLitWidget):
 
 
 if __name__ == "__main__":
-	Window.size = (2560, 1600)
+	Window.size = (1600, 1200)
 	Window.fullscreen = True
 	TubeToWellApp().run()
