@@ -70,6 +70,7 @@ class TubeToWellWidget(WellLitWidget):
 		self.save_directory = None
 		self.template_file = None
 		self.user = ""
+		self.initialized = False
 
 	def _on_keyboard_up(self, keyboard, keycode, text, modifiers):
 		if keycode[1] == "esc":
@@ -171,8 +172,10 @@ class TubeToWellWidget(WellLitWidget):
 
 		if os.path.isfile(str(filename)):
 			try:
-				self.ttw.setConfigurationFile(filename)
-				self.ids.dest_plate.initialize(filename)
+				if not self.initialized:
+					self.ttw.setConfigurationFile(filename)
+					self.ids.dest_plate.initialize(filename)
+					self.initialized = True
 			except TError as err:
 				self.showPopup(err, "Load Failed")
 			except TConfirm as conf:
