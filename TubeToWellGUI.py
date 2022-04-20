@@ -86,7 +86,7 @@ class TubeToWellWidget(WellLitWidget):
 		content = LoadDialog(
 			load=load_file_func, cancel=cancel_func, load_path=dir_path
 		)
-		self._popup = Popup(title=popup_title, content=content)
+		self._popup = Popup(title=popup_title, content=content, auto_dismiss=False)
 		self._popup.size_hint = (0.4, 0.8)
 		self._popup.pos_hint = {"x": 10.0 / Window.width, "y": 100 / Window.height}
 		self._popup.open()
